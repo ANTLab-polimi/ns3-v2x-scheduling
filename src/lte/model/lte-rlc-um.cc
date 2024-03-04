@@ -1325,7 +1325,9 @@ LteRlcUm::DoReportNrSlBufferStatus (void)
   m_txBuffer.back().m_pdu->PeekHeader(pdcpHeader);
   uint16_t packetSeqNumber = pdcpHeader.GetSequenceNumber();
 
-  m_nrSlMacSapProvider->ReportNrSlPacketDelayStatus(packetSeqNumber, m_txBuffer.back().m_waitingSince.GetMilliSeconds(), (uint32_t) m_txBuffer.size (), queueSize, m_rnti, r); 
+  m_nrSlMacSapProvider->ReportNrSlPacketDelayStatus(packetSeqNumber, m_txBuffer.back().m_waitingSince.GetMilliSeconds(), (uint32_t) m_txBuffer.size (), 
+                                                    m_txBuffer.back().m_pdu->GetSize(), // queueSize, 
+                                                    m_rnti, r); 
 }
 
 void
