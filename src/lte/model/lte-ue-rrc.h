@@ -42,6 +42,7 @@
 #include <ns3/nr-sl-ue-cmac-sap.h>
 #include <ns3/nr-sl-ue-cphy-sap.h>
 #include <ns3/nr-sl-pdcp-sap.h>
+#include <ns3/nr-sl-comm-resource-pool.h>
 #include <vector>
 
 #include <map>
@@ -1573,6 +1574,10 @@ private:
   NrSlMacSapProvider *m_nrSlMacSapProvider {nullptr}; //!< SAP interface to be given to newly created RLC instance of RLC
   uint32_t m_srcL2Id {std::numeric_limits <uint32_t>::max ()}; //!< The NR Sidelink Source L2 id;
 
+  // modified
+
+  NrSlCommResourcePool::SchedulingType m_schedulingType{NrSlCommResourcePool::UE_SELECTED};
+  // end modification
 }; // end of class LteUeRrc
 
 

@@ -334,6 +334,17 @@ LteUeRrc::GetTypeId (void)
                      "trace fired upon receiving in Sync or out of Sync indications from UE PHY",
                      MakeTraceSourceAccessor (&LteUeRrc::m_phySyncDetectionTrace),
                      "ns3::LteUeRrc::PhySyncDetectionTracedCallback")
+    // modified
+    // EnumValue
+    .AddAttribute ("V2XSchedulingType", 
+                   "Specify which type of RLC will be used for each type of EPS bearer. ",
+                   EnumValue (NrSlCommResourcePool::UE_SELECTED),
+                   MakeEnumAccessor (&LteUeRrc::m_schedulingType),
+                   MakeEnumChecker (NrSlCommResourcePool::UNKNOWN, "Unknown",
+                                    NrSlCommResourcePool::SCHEDULED, "Scheduled",
+                                    NrSlCommResourcePool::UE_SELECTED, "UeSelected",
+                                    NrSlCommResourcePool::ORAN_SELECTED, "OranSelected"))
+    // end modification
   ;
   return tid;
 }
@@ -3775,7 +3786,7 @@ LteUeRrc::PopulateNrSlPools ()
           slPool->SetNrSlPreConfigFreqInfoList (preConfig.slPreconfigFreqInfoList);
           //set the PhysicalSlPoolMap
           slPool->SetNrSlPhysicalPoolMap (mapPerBwp);
-          slPool->SetNrSlSchedulingType (NrSlCommResourcePool::UE_SELECTED);
+          slPool->SetNrSlSchedulingType (m_schedulingType);
 
           NS_LOG_INFO ("Configuring TX pool for BWP " << +index << " IMSI " << m_imsi);
           m_nrSlUeCmacSapProvider.at (index)->AddNrSlCommTxPool (slPool);
