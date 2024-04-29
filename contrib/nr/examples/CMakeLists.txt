@@ -1,22 +1,22 @@
 set(base_examples
-    cttc-3gpp-channel-example
-    cttc-3gpp-channel-simple-ran
-    cttc-3gpp-channel-simple-fdm
-    cttc-3gpp-indoor-calibration
-    cttc-3gpp-channel-nums
-    cttc-3gpp-channel-nums-fdm
-    cttc-nr-cc-bwp-demo
-    cttc-lte-ca-demo
-    cttc-nr-demo
-    cttc-error-model
-    cttc-error-model-amc
-    cttc-error-model-comparison
-    cttc-channel-randomness
-    rem-example
-    rem-beam-example
-    cttc-fh-compression
-    cttc-nr-notching
-    cttc-nr-mimo-demo
+    # cttc-3gpp-channel-example
+    # cttc-3gpp-channel-simple-ran
+    # cttc-3gpp-channel-simple-fdm
+    # cttc-3gpp-indoor-calibration
+    # cttc-3gpp-channel-nums
+    # cttc-3gpp-channel-nums-fdm
+    # cttc-nr-cc-bwp-demo
+    # cttc-lte-ca-demo
+    # cttc-nr-demo
+    # cttc-error-model
+    # cttc-error-model-amc
+    # cttc-error-model-comparison
+    # cttc-channel-randomness
+    # rem-example
+    # rem-beam-example
+    # cttc-fh-compression
+    # cttc-nr-notching
+    # cttc-nr-mimo-demo
 )
 
 foreach(
@@ -36,18 +36,18 @@ set(nr-v2x-examples_examples
     nr-v2x-west-to-east-highway
     nr-v2x-test
 )
-set(nr-v2x-examples_source_files
-    nr-v2x-examples/ue-mac-pscch-tx-output-stats.cc
-    nr-v2x-examples/ue-mac-pssch-tx-output-stats.cc
-    nr-v2x-examples/ue-phy-pscch-rx-output-stats.cc
-    nr-v2x-examples/ue-phy-pssch-rx-output-stats.cc
-    nr-v2x-examples/ue-rlc-rx-output-stats.cc
-    nr-v2x-examples/ue-to-ue-pkt-txrx-output-stats.cc
-    nr-v2x-examples/v2x-kpi.cc
-    # modified
-    nr-v2x-examples/ue-v2x-scheduling-xapp-stats.cc
-    # end modificaiton
-)
+# set(nr-v2x-examples_source_files
+#     nr-v2x-examples/ue-mac-pscch-tx-output-stats.cc
+#     nr-v2x-examples/ue-mac-pssch-tx-output-stats.cc
+#     nr-v2x-examples/ue-phy-pscch-rx-output-stats.cc
+#     nr-v2x-examples/ue-phy-pssch-rx-output-stats.cc
+#     nr-v2x-examples/ue-rlc-rx-output-stats.cc
+#     nr-v2x-examples/ue-to-ue-pkt-txrx-output-stats.cc
+#     nr-v2x-examples/v2x-kpi.cc
+#     # modified
+#     nr-v2x-examples/ue-v2x-scheduling-xapp-stats.cc
+#     # end modificaiton
+# )
 foreach(
   example
   ${nr-v2x-examples_examples}
@@ -55,7 +55,7 @@ foreach(
   build_lib_example(
     NAME ${example}
     SOURCE_FILES nr-v2x-examples/${example}.cc
-                 ${nr-v2x-examples_source_files}
+                #  ${nr-v2x-examples_source_files}
     LIBRARIES_TO_LINK ${libnr}
                       ${libflow-monitor}
                       ${libstats}
@@ -63,8 +63,8 @@ foreach(
 endforeach()
 
 set(lena-lte-comparison_examples
-    lena-lte-comparison-user
-    lena-lte-comparison-campaign
+    # lena-lte-comparison-user
+    # lena-lte-comparison-campaign
 )
 set(lena-lte-comparison_source_files 
     lena-lte-comparison/lena-lte-comparison.cc

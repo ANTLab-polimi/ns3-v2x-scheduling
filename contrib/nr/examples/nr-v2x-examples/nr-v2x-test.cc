@@ -61,12 +61,12 @@ $ ./ns3 run "cttc-nr-v2x-demo-simple --help"
 #include "ns3/stats-module.h"
 #include "ns3/config-store-module.h"
 #include "ns3/log.h"
-#include "ue-mac-pscch-tx-output-stats.h"
-#include "ue-mac-pssch-tx-output-stats.h"
-#include "ue-phy-pscch-rx-output-stats.h"
-#include "ue-phy-pssch-rx-output-stats.h"
-#include "ue-to-ue-pkt-txrx-output-stats.h"
-#include "ue-v2x-scheduling-xapp-stats.h"
+#include "ns3/ue-mac-pscch-tx-output-stats.h"
+#include "ns3/ue-mac-pssch-tx-output-stats.h"
+#include "ns3/ue-phy-pscch-rx-output-stats.h"
+#include "ns3/ue-phy-pssch-rx-output-stats.h"
+#include "ns3/ue-to-ue-pkt-txrx-output-stats.h"
+#include "ns3/ue-v2x-scheduling-xapp-stats.h"
 #include "ns3/antenna-module.h"
 #include "ns3/nr-sl-comm-resource-pool.h"
 #include <iomanip>
@@ -76,6 +76,10 @@ $ ./ns3 run "cttc-nr-v2x-demo-simple --help"
 #include <ns3/lte-ue-net-device.h>
 
 #include "ns3/parameters-config.h"
+
+#include "ns3/ns2-mobility-helper.h"
+#include "ns3/sl-stats-helper.h"
+#include "ns3/sl-mobility-stats.h"
 
 /*
  * Use, always, the namespace ns3. All the NR classes are inside such namespace.
@@ -88,135 +92,7 @@ using namespace ns3;
  *
  * $ export NS_LOG="CttcNrV2xDemoSimple=level_info|prefix_func|prefix_time"
  */
-NS_LOG_COMPONENT_DEFINE ("CttcNrV2xTest");
-
-void
-PrintGnuplottableUeListToFile(std::string filename)
-{
-    std::ofstream outFile;
-    outFile.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
-    if (!outFile.is_open())
-    {
-        NS_LOG_ERROR("Can't open file " << filename);
-        return;
-    }
-    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it)
-    {
-        Ptr<Node> node = *it;
-        int nDevs = node->GetNDevices();
-        for (int j = 0; j < nDevs; j++)
-        {
-            Ptr<LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
-            Ptr<NrUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<NrUeNetDevice>();
-            if (uedev)
-            {
-                Vector pos = node->GetObject<MobilityModel>()->GetPosition();
-                outFile << "set label \"" << uedev->GetImsi() << "\" at " << pos.x << "," << pos.y
-                        << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
-                           "0.3 lc rgb \"black\" offset 0,0"
-                        << std::endl;
-            }
-            else if (mmuedev)
-            {
-                Vector pos = node->GetObject<MobilityModel>()->GetPosition();
-                outFile << "set label \"" << mmuedev->GetImsi() << "\" at " << pos.x << "," << pos.y
-                        << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
-                           "0.3 lc rgb \"black\" offset 0,0"
-                        << std::endl;
-            }
-        }
-    }
-}
-
-
-/*
- * Global methods and variable to hook trace sources from different layers of
- * the protocol stack.
- */
-
-void NotifyxAppScheduling(UeV2XSchedulingXApp* v2xSchedStats, Ptr<NrGnbPhy> gnbPhyPtr, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo, std::string plmnId){
-  // here we save the data to the sql database to check if they are
-  // compatible with what was send
-  v2xSchedStats->Save(ueId, nrSlGrantInfo, plmnId, gnbPhyPtr->GetCurrentSfnSf());
-}
-
-/**
- * \brief Method to listen the trace SlPscchScheduling of NrUeMac, which gets
- *        triggered upon the transmission of SCI format 1-A from UE MAC.
- *
- * \param pscchStats Pointer to the UeMacPscchTxOutputStats class,
- *        which is responsible to write the trace source parameters to a database.
- * \param pscchStatsParams Parameters of the trace source.
- */
-void NotifySlPscchScheduling (UeMacPscchTxOutputStats *pscchStats, const SlPscchUeMacStatParameters pscchStatsParams)
-{
-  pscchStats->Save (pscchStatsParams);
-}
-
-/**
- * \brief Method to listen the trace SlPsschScheduling of NrUeMac, which gets
- *        triggered upon the transmission of SCI format 2-A and data from UE MAC.
- *
- * \param psschStats Pointer to the UeMacPsschTxOutputStats class,
- *        which is responsible to write the trace source parameters to a database.
- * \param psschStatsParams Parameters of the trace source.
- */
-void NotifySlPsschScheduling (UeMacPsschTxOutputStats *psschStats, const SlPsschUeMacStatParameters psschStatsParams)
-{
-  psschStats->Save (psschStatsParams);
-}
-
-/**
- * \brief Method to listen the trace RxPscchTraceUe of NrSpectrumPhy, which gets
- *        triggered upon the reception of SCI format 1-A.
- *
- * \param pscchStats Pointer to the UePhyPscchRxOutputStats class,
- *        which is responsible to write the trace source parameters to a database.
- * \param pscchStatsParams Parameters of the trace source.
- */
-void NotifySlPscchRx (UePhyPscchRxOutputStats *pscchStats, const SlRxCtrlPacketTraceParams pscchStatsParams)
-{
-  pscchStats->Save (pscchStatsParams);
-}
-
-/**
- * \brief Method to listen the trace RxPsschTraceUe of NrSpectrumPhy, which gets
- *        triggered upon the reception of SCI format 2-A and data.
- *
- * \param psschStats Pointer to the UePhyPsschRxOutputStats class,
- *        which is responsible to write the trace source parameters to a database.
- * \param psschStatsParams Parameters of the trace source.
- */
-void NotifySlPsschRx (UePhyPsschRxOutputStats *psschStats, const SlRxDataPacketTraceParams psschStatsParams)
-{
-  psschStats->Save (psschStatsParams);
-}
-
-/**
- * \brief Method to listen the application level traces of type TxWithAddresses
- *        and RxWithAddresses.
- * \param stats Pointer to the UeToUePktTxRxOutputStats class,
- *        which is responsible to write the trace source parameters to a database. *
- * \param node The pointer to the TX or RX node
- * \param localAddrs The local IPV4 address of the node
- * \param txRx The string indicating the type of node, i.e., TX or RX
- * \param p The packet
- * \param srcAddrs The source address from the trace
- * \param dstAddrs The destination address from the trace
- * \param seqTsSizeHeader The SeqTsSizeHeader
- */
-void
-UePacketTraceDb (UeToUePktTxRxOutputStats *stats, Ptr<Node> node, const Address &localAddrs,
-                 std::string txRx, Ptr<const Packet> p, const Address &srcAddrs,
-                 const Address &dstAddrs, const SeqTsSizeHeader &seqTsSizeHeader)
-{
-  uint32_t nodeId = node->GetId ();
-  uint64_t imsi = node->GetDevice (0)->GetObject<NrUeNetDevice> ()->GetImsi ();
-  uint32_t seq = seqTsSizeHeader.GetSeq ();
-  uint32_t pktSize = p->GetSize () + seqTsSizeHeader.GetSerializedSize ();
-
-  stats->Save (txRx, localAddrs, nodeId, imsi, pktSize, srcAddrs, dstAddrs, seq);
-}
+NS_LOG_COMPONENT_DEFINE ("NrV2xTest");
 
 /*
  * Global variables to count TX/RX packets and bytes.
@@ -321,6 +197,8 @@ main (int argc, char *argv[])
   double ueDiscCenterYPosition = 0;
   uint16_t ueNum = 50; // ue number 
 
+  std::string traceFile = outputDir;
+
   // end modification
 
   /*
@@ -399,6 +277,9 @@ main (int argc, char *argv[])
   cmd.AddValue("ueDiscCenterYPosition",
 				 "The y coordinate of the disc center of the ue position",
 				 ueDiscCenterYPosition);
+  cmd.AddValue("traceFile",
+          "Ns2 movement trace file",
+          traceFile);
   // end modification
   
   // Parse the command line
@@ -482,6 +363,8 @@ main (int argc, char *argv[])
    */
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue(999999999));
 
+  Ns2MobilityHelper ns2 = Ns2MobilityHelper(traceFile);
+
   /*
    * Create a NodeContainer for the UEs, name it as per their traffic type.
    */
@@ -506,20 +389,20 @@ main (int argc, char *argv[])
   // mobility.Install (ueVoiceContainer);
 
   double rho = 500;
-  Ptr<UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator> ();
-  uePositionAlloc->SetX(ueDiscCenterXPosition);
-  uePositionAlloc->SetY(ueDiscCenterYPosition);
-   uePositionAlloc->SetZ(1.5);
-  uePositionAlloc->SetRho (rho);
-  Ptr<UniformRandomVariable> speed = CreateObject<UniformRandomVariable> ();
-  speed->SetAttribute ("Min", DoubleValue (0.5));
-  speed->SetAttribute ("Max", DoubleValue (1.8));
-  mobility.SetMobilityModel ("ns3::RandomWalk2dOutdoorMobilityModel", "Speed",
-                                PointerValue (speed), "Bounds",
-                                RectangleValue (Rectangle (ueDiscCenterXPosition-rho, ueDiscCenterXPosition+rho, ueDiscCenterYPosition-rho, ueDiscCenterYPosition+rho)));
-  mobility.SetPositionAllocator (uePositionAlloc);
+  // Ptr<UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator> ();
+  // uePositionAlloc->SetX(ueDiscCenterXPosition);
+  // uePositionAlloc->SetY(ueDiscCenterYPosition);
+  //  uePositionAlloc->SetZ(1.5);
+  // uePositionAlloc->SetRho (rho);
+  // Ptr<UniformRandomVariable> speed = CreateObject<UniformRandomVariable> ();
+  // speed->SetAttribute ("Min", DoubleValue (0.5));
+  // speed->SetAttribute ("Max", DoubleValue (1.8));
+  // mobility.SetMobilityModel ("ns3::RandomWalk2dOutdoorMobilityModel", "Speed",
+  //                               PointerValue (speed), "Bounds",
+  //                               RectangleValue (Rectangle (ueDiscCenterXPosition-rho, ueDiscCenterXPosition+rho, ueDiscCenterYPosition-rho, ueDiscCenterYPosition+rho)));
+  // mobility.SetPositionAllocator (uePositionAlloc);
   
-  mobility.Install (ueVoiceContainer);
+  // mobility.Install (ueVoiceContainer);
 
   /* The default topology is the following:
    *
@@ -553,7 +436,7 @@ main (int argc, char *argv[])
   /* Create the configuration for the CcBwpHelper. SimpleOperationBandConf
    * creates a single BWP per CC
    */
-  CcBwpCreator::SimpleOperationBandConf bandConfSl (centralFrequencyBandSl, bandwidthBandSl, numCcPerBand, BandwidthPartInfo::V2V_Highway);
+  CcBwpCreator::SimpleOperationBandConf bandConfSl (centralFrequencyBandSl, bandwidthBandSl, numCcPerBand, BandwidthPartInfo::V2V_Urban);
 
   // By using the configuration created, it is time to make the operation bands
   OperationBandInfo bandSl = ccBwpCreator.CreateOperationBandContiguousCc (bandConfSl);
@@ -1018,30 +901,34 @@ main (int argc, char *argv[])
   UeV2XSchedulingXApp v2xSchedulingxApp;
   v2xSchedulingxApp.SetDb (&db, "v2XSchedulingXapp"); 
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrGnbNetDevice/SlV2XScheduling",
-                                   MakeBoundCallback (&NotifyxAppScheduling, &v2xSchedulingxApp, DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->GetPhy(0)));
+                                   MakeBoundCallback (&SlStatsHelper::NotifyxAppScheduling, &v2xSchedulingxApp, DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->GetPhy(0)));
+
+  // mobility 
+  SlMobilityStats mobilityStats;
+
 
   // end modification
 
   UeMacPscchTxOutputStats pscchStats;
   pscchStats.SetDb (&db, "pscchTxUeMac");
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPscchScheduling",
-                                   MakeBoundCallback (&NotifySlPscchScheduling, &pscchStats));
+                                   MakeBoundCallback (&SlStatsHelper::NotifySlPscchScheduling, &pscchStats));
 
   UeMacPsschTxOutputStats psschStats;
   psschStats.SetDb (&db, "psschTxUeMac");
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPsschScheduling",
-                                   MakeBoundCallback (&NotifySlPsschScheduling, &psschStats));
+                                   MakeBoundCallback (&SlStatsHelper::NotifySlPsschScheduling, &psschStats));
 
 
   UePhyPscchRxOutputStats pscchPhyStats;
   pscchPhyStats.SetDb (&db, "pscchRxUePhy");
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/RxPscchTraceUe",
-                                   MakeBoundCallback (&NotifySlPscchRx, &pscchPhyStats));
+                                   MakeBoundCallback (&SlStatsHelper::NotifySlPscchRx, &pscchPhyStats));
 
   UePhyPsschRxOutputStats psschPhyStats;
   psschPhyStats.SetDb (&db, "psschRxUePhy");
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/RxPsschTraceUe",
-                                   MakeBoundCallback (&NotifySlPsschRx, &psschPhyStats));
+                                   MakeBoundCallback (&SlStatsHelper::NotifySlPsschRx, &psschPhyStats));
 
   UeToUePktTxRxOutputStats pktStats;
   pktStats.SetDb (&db, "pktTxRx");
@@ -1054,7 +941,7 @@ main (int argc, char *argv[])
           Ipv4Address localAddrs =  clientApps.Get (ac)->GetNode ()->GetObject<Ipv4L3Protocol> ()->GetAddress (1,0).GetLocal ();
           std::cout << "Tx address: " << localAddrs << std::endl;
           // clientApps.Get (ac)->TraceConnect ("TxWithSeqTsSize", "tx", MakeBoundCallback (&UePacketTraceDb, &pktStats, ueVoiceContainer.Get (0), localAddrs));
-          clientApps.Get (ac)->TraceConnect ("TxWithSeqTsSize", "tx", MakeBoundCallback (&UePacketTraceDb, &pktStats, clientApps.Get (ac)->GetNode (), localAddrs));
+          clientApps.Get (ac)->TraceConnect ("TxWithSeqTsSize", "tx", MakeBoundCallback (&SlStatsHelper::UePacketTraceDb, &pktStats, clientApps.Get (ac)->GetNode (), localAddrs));
         }
 
       // Set Rx traces
@@ -1064,7 +951,7 @@ main (int argc, char *argv[])
           std::cout << "Rx address: " << localAddrs << std::endl;
           
           // serverApps.Get (ac)->TraceConnect ("RxWithSeqTsSize", "rx", MakeBoundCallback (&UePacketTraceDb, &pktStats, ueVoiceContainer.Get (1), localAddrs));
-          serverApps.Get (ac)->TraceConnect ("RxWithSeqTsSize", "rx", MakeBoundCallback (&UePacketTraceDb, &pktStats, serverApps.Get (ac)->GetNode (), localAddrs));
+          serverApps.Get (ac)->TraceConnect ("RxWithSeqTsSize", "rx", MakeBoundCallback (&SlStatsHelper::UePacketTraceDb, &pktStats, serverApps.Get (ac)->GetNode (), localAddrs));
         }
     }
   else
@@ -1076,7 +963,7 @@ main (int argc, char *argv[])
           Ipv6Address localAddrs =  clientApps.Get (ac)->GetNode ()->GetObject<Ipv6L3Protocol> ()->GetAddress (1,1).GetAddress ();
           std::cout << "Tx address: " << localAddrs << std::endl;
           // clientApps.Get (ac)->TraceConnect ("TxWithSeqTsSize", "tx", MakeBoundCallback (&UePacketTraceDb, &pktStats, ueVoiceContainer.Get (0), localAddrs));
-          clientApps.Get (ac)->TraceConnect ("TxWithSeqTsSize", "tx", MakeBoundCallback (&UePacketTraceDb, &pktStats, clientApps.Get (ac)->GetNode (), localAddrs));
+          clientApps.Get (ac)->TraceConnect ("TxWithSeqTsSize", "tx", MakeBoundCallback (&SlStatsHelper::UePacketTraceDb, &pktStats, clientApps.Get (ac)->GetNode (), localAddrs));
         }
 
       // Set Rx traces
@@ -1086,9 +973,16 @@ main (int argc, char *argv[])
           Ipv6Address localAddrs =  serverApps.Get (ac)->GetNode ()->GetObject<Ipv6L3Protocol> ()->GetAddress (1,1).GetAddress ();
           std::cout << "Rx address: " << localAddrs << std::endl;
           // serverApps.Get (ac)->TraceConnect ("RxWithSeqTsSize", "rx", MakeBoundCallback (&UePacketTraceDb, &pktStats, ueVoiceContainer.Get (ac), localAddrs));
-          serverApps.Get (ac)->TraceConnect ("RxWithSeqTsSize", "rx", MakeBoundCallback (&UePacketTraceDb, &pktStats, serverApps.Get (ac)->GetNode (), localAddrs));
+          serverApps.Get (ac)->TraceConnect ("RxWithSeqTsSize", "rx", MakeBoundCallback (&SlStatsHelper::UePacketTraceDb, &pktStats, serverApps.Get (ac)->GetNode (), localAddrs));
         }
     }
+
+  // install the mobility of nodes
+  // TODO: check the mobility of gnb
+  ns2.Install();
+
+  Config::ConnectWithoutContext ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+                   MakeBoundCallback (&SlStatsHelper::CourseChange, &mobilityStats));
 
 
   Simulator::Stop (finalSimTime);
@@ -1114,6 +1008,8 @@ main (int argc, char *argv[])
   pscchPhyStats.EmptyCache ();
   psschPhyStats.EmptyCache ();
   v2xSchedulingxApp.EmptyCache ();
+
+  mobilityStats.EmptyCache();
 
   Simulator::Destroy ();
   return 0;

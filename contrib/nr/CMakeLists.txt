@@ -116,6 +116,7 @@ set(source_files
     # modified
     model/tiny-xml/tinyxml2.cpp
     helper/parameters-config.cc
+    helper/extra-classes/sl-mobility-stats.cc
     #
 )
 
@@ -244,6 +245,7 @@ set(header_files
     # modified
     model/tiny-xml/tinyxml2.h
     helper/parameters-config.h
+    helper/extra-classes/sl-mobility-stats.h
     #
 )
 
@@ -277,6 +279,91 @@ set(test_sources
     test/test-nr-sl-sci-headers.cc
 )
 
+set(extra-classes_header_files
+    helper/extra-classes/sl-stats-helper.h
+    helper/extra-classes/sl-packet-trace-stats.h
+    helper/extra-classes/sl-power-output-stats.h
+    helper/extra-classes/sl-slot-stats.h
+    helper/extra-classes/sl-slot-output-stats.h
+    helper/extra-classes/sl-slot-ctrl-output-stats.h
+    helper/extra-classes/sl-rb-output-stats.h
+    helper/extra-classes/sl-sinr-output-stats.h
+    helper/extra-classes/sl-flow-monitor-output-stats.h
+    helper/extra-classes/sl-downlink-tb-size-stats.h
+    helper/extra-classes/sl-uplink-tb-size-stats.h
+    helper/extra-classes/sl-ctrl-ul-dci-stats.h
+    helper/extra-classes/sl-mac-sr-stats.h
+    helper/extra-classes/sl-mac-rlc-buffer-status.h
+    helper/extra-classes/sl-ue-bsr-stats.h
+    helper/extra-classes/sl-ue-pss-received-stats.h
+    helper/extra-classes/nr-dl-scheduling-stats.h
+    helper/extra-classes/sl-ctrl-msgs-stats.h
+    helper/extra-classes/ppbp/PPBP-application.h
+    helper/extra-classes/ppbp/PPBP-helper.h
+    helper/extra-classes/ppbp-2/PPBP-application-2.h
+    helper/extra-classes/ppbp-2/PPBP-helper-2.h
+    # modified
+    model/tiny-xml/tinyxml2.h
+    helper/parameters-config.h
+    helper/extra-classes/sl-mobility-stats.h
+    #
+)
+
+set(extra-classes_source_files
+    helper/extra-classes/sl-stats-helper.cc
+    helper/extra-classes/sl-packet-trace-stats.cc
+    helper/extra-classes/sl-power-output-stats.cc
+    helper/extra-classes/sl-slot-output-stats.cc
+    helper/extra-classes/sl-slot-stats.cc
+    helper/extra-classes/sl-slot-ctrl-output-stats.cc
+    helper/extra-classes/sl-rb-output-stats.cc
+    helper/extra-classes/sl-sinr-output-stats.cc
+    helper/extra-classes/sl-flow-monitor-output-stats.cc
+    helper/extra-classes/sl-downlink-tb-size-stats.cc
+    helper/extra-classes/sl-uplink-tb-size-stats.cc
+    helper/extra-classes/sl-ctrl-ul-dci-stats.cc
+    helper/extra-classes/sl-mac-sr-stats.cc
+    helper/extra-classes/sl-mac-rlc-buffer-status.cc
+    helper/extra-classes/sl-ue-bsr-stats.cc
+    helper/extra-classes/sl-ue-pss-received-stats.cc
+    helper/extra-classes/nr-dl-scheduling-stats.cc
+    helper/extra-classes/sl-ctrl-msgs-stats.cc
+    helper/extra-classes/ppbp/PPBP-application.cc
+    helper/extra-classes/ppbp/PPBP-helper.cc
+    helper/extra-classes/ppbp-2/PPBP-application-2.cc
+    helper/extra-classes/ppbp-2/PPBP-helper-2.cc
+    # modified
+    model/tiny-xml/tinyxml2.cpp
+    helper/parameters-config.cc
+    helper/extra-classes/sl-mobility-stats.cc
+    #
+) 
+
+set(nr-v2x-stats_source_files
+    helper/sl-stats/ue-mac-pscch-tx-output-stats.cc
+    helper/sl-stats/ue-mac-pssch-tx-output-stats.cc
+    helper/sl-stats/ue-phy-pscch-rx-output-stats.cc
+    helper/sl-stats/ue-phy-pssch-rx-output-stats.cc
+    helper/sl-stats/ue-rlc-rx-output-stats.cc
+    helper/sl-stats/ue-to-ue-pkt-txrx-output-stats.cc
+    helper/sl-stats/v2x-kpi.cc
+    # modified
+    helper/sl-stats/ue-v2x-scheduling-xapp-stats.cc
+    # end modificaiton
+)
+set(nr-v2x-stats_header_files
+    helper/sl-stats/ue-mac-pscch-tx-output-stats.h
+    helper/sl-stats/ue-mac-pssch-tx-output-stats.h
+    helper/sl-stats/ue-phy-pscch-rx-output-stats.h
+    helper/sl-stats/ue-phy-pssch-rx-output-stats.h
+    helper/sl-stats/ue-rlc-rx-output-stats.h
+    helper/sl-stats/ue-to-ue-pkt-txrx-output-stats.h
+    helper/sl-stats/v2x-kpi.h
+    # modified
+    helper/sl-stats/ue-v2x-scheduling-xapp-stats.h
+    # end modificaiton
+)
+
 find_external_library(DEPENDENCY_NAME e2sim
                         HEADER_NAME e2sim.hpp
                         LIBRARY_NAME e2sim
@@ -291,8 +378,8 @@ endif()
 
 build_lib(
   LIBNAME nr
-  SOURCE_FILES ${source_files}
-  HEADER_FILES ${header_files}
+  SOURCE_FILES ${source_files} ${extra-classes_source_files} ${nr-v2x-stats_source_files}
+  HEADER_FILES ${header_files} ${extra-classes_header_files} ${nr-v2x-stats_header_files}
   LIBRARIES_TO_LINK
     ${liblte}
     ${libinternet-apps}
