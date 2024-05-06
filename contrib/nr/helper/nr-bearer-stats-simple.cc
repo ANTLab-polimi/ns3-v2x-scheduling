@@ -113,6 +113,11 @@ NrBearerStatsSimple::GetTypeId (void)
                    StringValue ("NrUlPdcpRxStats.txt"),
                    MakeStringAccessor (&NrBearerStatsSimple::m_ulPdcpRxOutputFilename),
                    MakeStringChecker ())
+    .AddAttribute ("UeRlcBufferSizeOutputFilename",
+                   "Name of the file where the ue rlc buffer size results will be saved.",
+                   StringValue ("UeRlcBufferSizeStats.txt"),
+                   MakeStringAccessor (&NrBearerStatsSimple::SetUeRlcBufferSizeFilename),
+                   MakeStringChecker ())
   ;
   return tid;
 }
@@ -185,6 +190,21 @@ NrBearerStatsSimple::DlRxPdu (uint16_t cellId, uint64_t imsi, uint16_t rnti, uin
   m_dlRxOutFile << Simulator::Now ().GetSeconds () << "\t" << cellId << "\t"<< rnti << "\t" << (uint32_t) lcid << "\t" << packetSize << "\t" << delay * 1e-9 << std::endl;
 }
 
+// ue buffer size
+
+void
+NrBearerStatsSimple::UeRlcBufferSize (uint16_t cellId, uint64_t imsi, uint32_t bufferSize, uint32_t maxBufferSize)
+{
+  NS_LOG_FUNCTION (this << " cell " << cellId << " buff size "  << bufferSize << " max size " << maxBufferSize);
+
+  if (!m_ueRlcBufferSizeFile.is_open ())
+    {
+      m_ueRlcBufferSizeFile.open (m_ueRlcbufferSizeOutputFilename.c_str ()); // , std::ios_base::app
+      m_ueRlcBufferSizeFile << "CellId"  << " " << "Imsi"  << " " <<  "RlcBufferSize" << " " << "RlcMaxBufferSize"<< " " << "Timestamp" << std::endl;
+    }
+  m_ueRlcBufferSizeFile << cellId << " " << imsi << " " << bufferSize << " " << maxBufferSize << " " << Simulator::Now () << std::endl;
+}
+
 std::string
 NrBearerStatsSimple::GetUlTxOutputFilename (void)
 {
@@ -235,6 +255,18 @@ NrBearerStatsSimple::GetDlRxOutputFilename (void)
     {
       return m_dlPdcpRxOutputFilename;
     }
+}
+
+void
+NrBearerStatsSimple::SetUeRlcBufferSizeFilename (std::string outputFilename)
+{
+  m_ueRlcbufferSizeOutputFilename = outputFilename;
+}
+
+std::string
+NrBearerStatsSimple::GetUeRlcBufferSizeFilename (void)
+{
+  return m_ueRlcbufferSizeOutputFilename;
 }
 
 } // namespace ns3

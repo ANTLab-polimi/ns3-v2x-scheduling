@@ -66,7 +66,7 @@ $ ./ns3 run "cttc-nr-v2x-demo-simple --help"
 #include "ns3/ue-phy-pscch-rx-output-stats.h"
 #include "ns3/ue-phy-pssch-rx-output-stats.h"
 #include "ns3/ue-to-ue-pkt-txrx-output-stats.h"
-#include "ns3/ue-v2x-scheduling-xapp-stats.h"
+#include "ns3/ue-v2x-scheduling-stats.h"
 #include "ns3/antenna-module.h"
 #include "ns3/nr-sl-comm-resource-pool.h"
 #include <iomanip>
@@ -157,13 +157,13 @@ main (int argc, char *argv[])
    */
   // Scenario parameters (that we will use inside this script):
   uint16_t interUeDistance = 2; //meters
-  bool logging = false;
+  bool logging = true;
 
 
   // Traffic parameters (that we will use inside this script:)
   bool useIPv6 = false; // default IPV4
   uint32_t udpPacketSizeBe = 200;
-  double dataRateBe = 16; //16 kilobits per second
+  double dataRateBe = 160; //16 kilobits per second
 
   // Simulation parameters.
   Time simTime = Seconds (30);
@@ -179,25 +179,23 @@ main (int argc, char *argv[])
   double txPower = 23; //dBm
 
   // Where we will store the output files.
-  // std::string simTag = "default";
-  // std::string outputDir = "./";
 
   // modified
   std::string ltePlmnId = "111";
 	std::string ricE2TermIpAddress = "10.0.2.10";
 	uint16_t ricE2TermPortNumber = 36422;
 	uint16_t e2startingPort = 38470;
-  std::string simTag = "nr-v2x-test-5";
-	std::string outputDir = "/storage/franci/simulations/nr-v2x/";
+  std::string simTag = "nr-v2x-test";
+	std::string outputDir = "/storage/franci/simulations/ns3-v2x/nr-v2x-mode2/";
   bool e2cuCp = true;
   bool e2du = false;
   bool isXappEnabled = false;
   uint8_t schedulingType = 2;// default is ue Selected (2) and 3 is ORAN SELECTED
   double ueDiscCenterXPosition = 0;
   double ueDiscCenterYPosition = 0;
-  uint16_t ueNum = 50; // ue number 
+  uint16_t ueNum = 20; // ue number 
 
-  std::string traceFile = outputDir;
+  std::string traceFile = outputDir+"new_mobility.tcl";
 
   // end modification
 
@@ -285,7 +283,26 @@ main (int argc, char *argv[])
   // Parse the command line
   cmd.Parse (argc, argv);
 
-  ParametersConfig::EnableTraces();
+  // ParametersConfig::EnableTraces();
+
+  if (logging)
+    {
+      LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_PREFIX_NODE | LOG_LEVEL_ALL | LOG_DEBUG | LOG_LEVEL_FUNCTION);
+      // LogComponentEnable ("UdpClient", logLevel);
+      // LogComponentEnable ("UdpServer", logLevel);
+      // LogComponentEnable ("LtePdcp", logLevel);
+      // LogComponentEnable ("NrSlHelper", logLevel);
+      // LogComponentEnable ("NrSlUeRrc", logLevel);
+      LogComponentEnable ("NrUeMac", logLevel);
+      // LogComponentEnable ("NrUePhy", logLevel);
+      // LogComponentEnable ("NrSpectrumPhy", logLevel);
+      // LogComponentEnable ("E2Termination", logLevel);
+      // LogComponentEnable ("NrGnbNetDevice", logLevel);
+      // LogComponentEnable ("Asn1Types", logLevel);
+      // LogComponentEnable ("ThreeGppSpectrumPropagationLossModel", logLevel);
+
+      
+    }
 
   double indicationPeriodicity = 0.01; // seconds
 
@@ -331,33 +348,6 @@ main (int argc, char *argv[])
   NS_ABORT_IF (centralFrequencyBandSl > 6e9);
 
   /*
-   * If the logging variable is set to true, enable the log of some components
-   * through the code. The same effect can be obtained through the use
-   * of the NS_LOG environment variable:
-   *
-   * export NS_LOG="UdpClient=level_info|prefix_time|prefix_func|prefix_node:UdpServer=..."
-   *
-   * Usually, the environment variable way is preferred, as it is more customizable,
-   * and more expressive.
-   */
-  if (logging)
-    {
-      LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_PREFIX_NODE | LOG_LEVEL_ALL | LOG_DEBUG | LOG_LEVEL_FUNCTION);
-      // LogComponentEnable ("UdpClient", logLevel);
-      // LogComponentEnable ("UdpServer", logLevel);
-      // LogComponentEnable ("LtePdcp", logLevel);
-      LogComponentEnable ("NrSlHelper", logLevel);
-      // LogComponentEnable ("NrSlUeRrc", logLevel);
-      LogComponentEnable ("NrUeMac", logLevel);
-      // LogComponentEnable ("NrUePhy", logLevel);
-      // LogComponentEnable ("NrSpectrumPhy", logLevel);
-      // LogComponentEnable ("E2Termination", logLevel);
-      LogComponentEnable ("NrGnbNetDevice", logLevel);
-      // LogComponentEnable ("Asn1Types", logLevel);
-      // LogComponentEnable ("KpmIndicationMessage", logLevel);
-    }
-
-  /*
    * Default values for the simulation. We are progressively removing all
    * the instances of SetDefault, but we need it for legacy code (LTE)
    */
@@ -365,20 +355,13 @@ main (int argc, char *argv[])
 
   Ns2MobilityHelper ns2 = Ns2MobilityHelper(traceFile);
 
-  /*
-   * Create a NodeContainer for the UEs, name it as per their traffic type.
-   */
   NodeContainer ueVoiceContainer;
   ueVoiceContainer.Create (ueNum);
 
-  /*
-   * Assign mobility to the UEs.
-   *  1. Set mobility model type.
-   *  2. Assign position to the UEss
-   *  3. Install mobility model
-   */
+  NodeContainer enbNodes;
+  enbNodes.Create (1);
 
-  MobilityHelper mobility;
+  // MobilityHelper mobility;
   // mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   // Ptr<ListPositionAllocator> positionAllocUe = CreateObject<ListPositionAllocator> ();
   // for (uint16_t i = 0; i < ueNum; i++)
@@ -388,7 +371,7 @@ main (int argc, char *argv[])
   // mobility.SetPositionAllocator (positionAllocUe);
   // mobility.Install (ueVoiceContainer);
 
-  double rho = 500;
+  // double rho = 500;
   // Ptr<UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator> ();
   // uePositionAlloc->SetX(ueDiscCenterXPosition);
   // uePositionAlloc->SetY(ueDiscCenterYPosition);
@@ -401,22 +384,11 @@ main (int argc, char *argv[])
   //                               PointerValue (speed), "Bounds",
   //                               RectangleValue (Rectangle (ueDiscCenterXPosition-rho, ueDiscCenterXPosition+rho, ueDiscCenterYPosition-rho, ueDiscCenterYPosition+rho)));
   // mobility.SetPositionAllocator (uePositionAlloc);
-  
   // mobility.Install (ueVoiceContainer);
+  // install the mobility of nodes
+  // TODO: check the mobility of gnb
+  ns2.Install();
 
-  /* The default topology is the following:
-   *
-   *         UE1..........(20 m)..........UE2
-   *   (0.0, 0.0, 1.5)               (20, 0.0, 1.5)
-   */
-
-  /*
-   * Setup the NR module. We create the various helpers needed for the
-   * NR simulation:
-   * - EpcHelper, which will setup the core network
-   * - NrHelper, which takes care of creating and connecting the various
-   * part of the NR stack
-   */
   Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper> ();
   Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
 
@@ -436,53 +408,17 @@ main (int argc, char *argv[])
   /* Create the configuration for the CcBwpHelper. SimpleOperationBandConf
    * creates a single BWP per CC
    */
-  CcBwpCreator::SimpleOperationBandConf bandConfSl (centralFrequencyBandSl, bandwidthBandSl, numCcPerBand, BandwidthPartInfo::V2V_Urban);
+  CcBwpCreator::SimpleOperationBandConf bandConfSl (centralFrequencyBandSl, bandwidthBandSl, numCcPerBand, BandwidthPartInfo::V2V_Highway);
 
   // By using the configuration created, it is time to make the operation bands
   OperationBandInfo bandSl = ccBwpCreator.CreateOperationBandContiguousCc (bandConfSl);
 
-  /*
-   * The configured spectrum division is:
-   * ------------Band1--------------
-   * ------------CC1----------------
-   * ------------BwpSl--------------
-   */
-
-  /*
-   * Attributes of ThreeGppChannelModel still cannot be set in our way.
-   * TODO: Coordinate with Tommaso
-   */
   Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds(100)));
   nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
   nrHelper->SetPathlossAttribute ("ShadowingEnabled", BooleanValue (false));
 
-  /*
-   * Initialize channel and pathloss, plus other things inside bandSl. If needed,
-   * the band configuration can be done manually, but we leave it for more
-   * sophisticated examples. For the moment, this method will take care
-   * of all the spectrum initialization needs.
-   */
   nrHelper->InitializeOperationBand (&bandSl);
   allBwps = CcBwpCreator::GetAllBwps ({bandSl});
-
-
-  /*
-   * allBwps contains all the spectrum configuration needed for the nrHelper.
-   *
-   * Now, we can setup the attributes. We can have three kind of attributes:
-   * (i) parameters that are valid for all the bandwidth parts and applies to
-   * all nodes, (ii) parameters that are valid for all the bandwidth parts
-   * and applies to some node only, and (iii) parameters that are different for
-   * every bandwidth parts. The approach is:
-   *
-   * - for (i): Configure the attribute through the helper, and then install;
-   * - for (ii): Configure the attribute through the helper, and then install
-   * for the first set of nodes. Then, change the attribute through the helper,
-   * and install again;
-   * - for (iii): Install, and then configure the attributes by retrieving
-   * the pointer needed, and calling "SetAttribute" on top of such pointer.
-   *
-   */
 
   Packet::EnableChecking ();
   Packet::EnablePrinting ();
@@ -540,8 +476,6 @@ main (int argc, char *argv[])
 
   BandwidthPartInfoPtrVector allBwpsGnb = CcBwpCreator::GetAllBwps ({bandGnb});
 
-  NodeContainer enbNodes;
-  enbNodes.Create (1);
   // position the base stations
   Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
   enbPositionAlloc->Add (Vector (0.0, 0.0, 35));
@@ -557,21 +491,6 @@ main (int argc, char *argv[])
 
   nrHelper->GetGnbPhy (enbNetDev.Get (0), 0)->SetTxPower (-10);
   DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->UpdateConfig ();
-  // finish set up of gnb
-
-  
-
-  /*
-   * We miss many other parameters. By default, not configuring them is equivalent
-   * to use the default values. Please, have a look at the documentation to see
-   * what are the default values for all the attributes you are not seeing here.
-   */
-
-  /*
-   * Case (ii): Attributes valid for a subset of the nodes
-   */
-
-  // NOT PRESENT IN THIS SIMPLE EXAMPLE
 
   /*
    * We have configured the attributes we needed. Now, install and get the pointers
@@ -579,21 +498,13 @@ main (int argc, char *argv[])
    */
   NetDeviceContainer ueVoiceNetDev = nrHelper->InstallUeDevice (ueVoiceContainer, allBwps);
 
-  /*
-   * Case (iii): Go node for node and change the attributes we have to setup
-   * per-node.
-   */
-
   // When all the configuration is done, explicitly call UpdateConfig ()
   for (auto it = ueVoiceNetDev.Begin (); it != ueVoiceNetDev.End (); ++it)
   {
     // DynamicCast<NrUeNetDevice> (*it)->UpdateConfig ();
-
     Ptr<NrUeNetDevice> nruedev = DynamicCast<NrUeNetDevice> (*it);
     nruedev->UpdateConfig ();
 
-    // std::cout << "Curr sfnsg gnb " << DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->GetPhy(0)->GetCurrentSfnSf() <<
-    // " sfnsf ue "<<  nruedev->GetPhy(0)->GetCurrentSfnSf() << " imsi " << nruedev->GetImsi();
   }
 
   /*
@@ -629,33 +540,12 @@ main (int argc, char *argv[])
   nrSlHelper->SetUeSlSchedulerAttribute ("FixNrSlMcs", BooleanValue (true));
   nrSlHelper->SetUeSlSchedulerAttribute ("InitialNrSlMcs", UintegerValue (14));
 
-  /*
-   * Very important method to configure UE protocol stack, i.e., it would
-   * configure all the SAPs among the layers, setup callbacks, configure
-   * error model, configure AMC, and configure ChunkProcessor in Interference
-   * API.
-   */
   nrSlHelper->PrepareUeForSidelink (ueVoiceNetDev, bwpIdContainer);
-
-
-  /*
-   * Start preparing for all the sub Structs/RRC Information Element (IEs)
-   * of LteRrcSap::SidelinkPreconfigNr. This is the main structure, which would
-   * hold all the pre-configuration related to Sidelink.
-   */
 
   //SlResourcePoolNr IE
   LteRrcSap::SlResourcePoolNr slResourcePoolNr;
   //get it from pool factory
   Ptr<NrSlCommPreconfigResourcePoolFactory> ptrFactory = Create<NrSlCommPreconfigResourcePoolFactory> ();
-  /*
-   * Above pool factory is created to help the users of the simulator to create
-   * a pool with valid default configuration. Please have a look at the
-   * constructor of NrSlCommPreconfigResourcePoolFactory class.
-   *
-   * In the following, we show how one could change those default pool parameter
-   * values as per the need.
-   */
   std::vector <std::bitset<1> > slBitmap = {1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1};
   ptrFactory->SetSlTimeResources (slBitmap);
   ptrFactory->SetSlSensingWindow (100); // T0 in ms
@@ -753,13 +643,6 @@ main (int argc, char *argv[])
   stream += nrHelper->AssignStreams (ueVoiceNetDev, stream);
   stream += nrSlHelper->AssignStreams (ueVoiceNetDev, stream);
 
-  /*
-   * Configure the IP stack, and activate NR Sidelink bearer (s) as per the
-   * configured time.
-   *
-   * This example supports IPV4 and IPV6
-   */
-
   InternetStackHelper internet;
   internet.Install (ueVoiceContainer);
   stream += internet.AssignStreams (ueVoiceContainer, stream);
@@ -810,12 +693,6 @@ main (int argc, char *argv[])
       //Set Sidelink bearers
       nrSlHelper->ActivateNrSlBearer (finalSlBearersActivationTime, ueVoiceNetDev, tft);
     }
-
-  /*
-   * Configure the applications:
-   * Client app: OnOff application configure to generate CBR traffic
-   * Server app: PacketSink application.
-   */
 
   //Set Application in the UEs
   OnOffHelper sidelinkClient ("ns3::UdpSocketFactory", remoteAddress);
@@ -870,15 +747,6 @@ main (int argc, char *argv[])
                                    MakeBoundCallback (&NrUeMac::V2xE2SchedulingTraceCallback, DynamicCast<NrUeMac> (DynamicCast<NrUeNetDevice> (*it)->GetMac (0))));
     }
 
-  // store the received scheduling command to sql to compare with the ones sent
-  
-  // end modification
-
-  /*
-   * Hook the traces, to be used to compute average PIR and to data to be
-   * stored in a database
-   */
-
   //Trace receptions; use the following to be robust to node ID changes
   std::ostringstream path;
   path << "/NodeList/" << ueVoiceContainer.Get (1)->GetId () << "/ApplicationList/0/$ns3::PacketSink/Rx";
@@ -898,14 +766,20 @@ main (int argc, char *argv[])
   SQLiteOutput db (outputDir + exampleName);
 
   // modified
-  UeV2XSchedulingXApp v2xSchedulingxApp;
+  UeV2XScheduling v2xSchedulingxApp;
   v2xSchedulingxApp.SetDb (&db, "v2XSchedulingXapp"); 
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrGnbNetDevice/SlV2XScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifyxAppScheduling, &v2xSchedulingxApp, DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->GetPhy(0)));
 
+  // Mode 2 scheduling
+  UeV2XScheduling v2xSchedulingMode2;
+  v2xSchedulingMode2.SetDb (&db, "v2xSchedulingMode2"); 
+  Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/UeSlV2XScheduling",
+                                   MakeBoundCallback (&SlStatsHelper::NotifyUeScheduling, &v2xSchedulingMode2));
+
   // mobility 
   SlMobilityStats mobilityStats;
-
+  mobilityStats.SetDb (&db, "mobility"); 
 
   // end modification
 
@@ -977,13 +851,21 @@ main (int argc, char *argv[])
         }
     }
 
-  // install the mobility of nodes
-  // TODO: check the mobility of gnb
-  ns2.Install();
+  for (auto it = ueVoiceNetDev.Begin (); it != ueVoiceNetDev.End (); ++it)
+  {
+    Ptr<NrUeNetDevice> dev = DynamicCast<NrUeNetDevice> (*it);
 
-  Config::ConnectWithoutContext ("/NodeList/*/$ns3::MobilityModel/CourseChange",
-                   MakeBoundCallback (&SlStatsHelper::CourseChange, &mobilityStats));
+    Ptr<MobilityModel> mm = dev->GetNode()->GetObject<MobilityModel> ();
+    mm->TraceConnectWithoutContext("CourseChange", MakeBoundCallback (&SlStatsHelper::CourseChange, &mobilityStats, (*it), "ue"));
+  }
 
+  for (auto it = enbNetDev.Begin (); it != enbNetDev.End (); ++it)
+  {
+    Ptr<NrGnbNetDevice> dev = DynamicCast<NrGnbNetDevice> (*it);
+
+    Ptr<MobilityModel> mm = dev->GetNode()->GetObject<MobilityModel> ();
+    mm->TraceConnectWithoutContext("CourseChange", MakeBoundCallback (&SlStatsHelper::CourseChange, &mobilityStats, (*it), "gnb"));
+  }
 
   Simulator::Stop (finalSimTime);
   Simulator::Run ();
@@ -1008,6 +890,7 @@ main (int argc, char *argv[])
   pscchPhyStats.EmptyCache ();
   psschPhyStats.EmptyCache ();
   v2xSchedulingxApp.EmptyCache ();
+  v2xSchedulingMode2.EmptyCache();
 
   mobilityStats.EmptyCache();
 

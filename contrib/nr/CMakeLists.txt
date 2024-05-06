@@ -348,7 +348,7 @@ set(nr-v2x-stats_source_files
     helper/sl-stats/ue-to-ue-pkt-txrx-output-stats.cc
     helper/sl-stats/v2x-kpi.cc
     # modified
-    helper/sl-stats/ue-v2x-scheduling-xapp-stats.cc
+    helper/sl-stats/ue-v2x-scheduling-stats.cc
     # end modificaiton
 )
 set(nr-v2x-stats_header_files
@@ -360,7 +360,7 @@ set(nr-v2x-stats_header_files
     helper/sl-stats/ue-to-ue-pkt-txrx-output-stats.h
     helper/sl-stats/v2x-kpi.h
     # modified
-    helper/sl-stats/ue-v2x-scheduling-xapp-stats.h
+    helper/sl-stats/ue-v2x-scheduling-stats.h
     # end modificaiton
 )
 

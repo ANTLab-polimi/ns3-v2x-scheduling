@@ -1138,6 +1138,10 @@ private:
   
   Ptr<NetDevice> m_netDevice;
 
+  // modified
+  TracedCallback<uint64_t, NrSlGrantInfo> m_ueV2XSchedulingTrace; 
+  // end modification
+
 };
 
 }

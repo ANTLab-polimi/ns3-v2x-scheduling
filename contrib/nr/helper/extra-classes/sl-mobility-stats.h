@@ -59,7 +59,7 @@ public:
    * \param [in] pos bandwidth id
    * \param [in] vel rnti
    */
-  void SaveSlMobilityStats (Vector pos, Vector vel);
+  void SaveSlMobilityStats (Vector pos, Vector vel, uint64_t id, std::string deviceType);
 
   /**
    * \brief Force the cache write to disk, emptying the cache itself.
@@ -77,6 +77,8 @@ private:
     Time timeInstance;
     Vector pos;
     Vector vel;
+    uint64_t id;
+    std::string deviceType;
   };
 
   SQLiteOutput *m_db;                         //!< DB pointer

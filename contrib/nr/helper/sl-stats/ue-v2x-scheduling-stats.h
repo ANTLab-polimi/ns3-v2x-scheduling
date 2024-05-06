@@ -33,13 +33,13 @@ namespace ns3 {
  * \see SetDb
  * \see Save
  */
-class UeV2XSchedulingXApp
+class UeV2XScheduling
 {
 public:
   /**
    * \brief UeMacPscchTxOutputStats constructor
    */
-  UeV2XSchedulingXApp ();
+  UeV2XScheduling ();
 
   /**
    * \brief Install the output database for PSCCH trace from NrUeMac.
@@ -87,6 +87,8 @@ public:
    * \param pscchStatsParams The PSCCH stats parameters
    */
   void Save (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo, std::string plmnId, const SfnSf & sfnsf);
+
+  void SaveUeSched(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo);
 
   /**
    * \brief Force the cache write to disk, emptying the cache itself.

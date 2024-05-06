@@ -98,6 +98,11 @@ NrBearerStatsCalculator::GetTypeId (void)
                    StringValue ("NrUlPdcpStatsE2E.txt"),
                    MakeStringAccessor (&NrBearerStatsCalculator::m_ulPdcpOutputFilename),
                    MakeStringChecker ())
+    .AddAttribute ("UeRlcBufferSizeOutputFilename",
+                   "Name of the file where the ue rlc buffer size results will be saved.",
+                   StringValue ("UeRlcBufferSizeStats.txt"),
+                   MakeStringAccessor (&NrBearerStatsCalculator::SetUeRlcBufferSizeFilename),
+                   MakeStringChecker ())
   ;
   return tid;
 }
@@ -220,6 +225,23 @@ NrBearerStatsCalculator::DlRxPdu (uint16_t cellId, uint64_t imsi, uint16_t rnti,
     }
   m_pendingOutput = true;
 }
+
+// ue buffer size
+
+void
+NrBearerStatsCalculator::UeRlcBufferSize (uint16_t cellId, uint64_t imsi, uint32_t bufferSize, uint32_t maxBufferSize)
+{
+  NS_LOG_FUNCTION (this << " cell " << cellId << " buff size "  << bufferSize << " max size " << maxBufferSize);
+
+  if (!m_ueRlcBufferSizeFile.is_open ())
+    {
+      m_ueRlcBufferSizeFile.open (m_ueRlcbufferSizeOutputFilename.c_str ()); // , std::ios_base::app
+      m_ueRlcBufferSizeFile << "CellId"  << " " << "Imsi"  << " " <<  "RlcBufferSize" << " " << "RlcMaxBufferSize"<< " " << "Timestamp" << std::endl;
+    }
+  m_ueRlcBufferSizeFile << cellId << " " << imsi << " " << bufferSize << " " << maxBufferSize << " " << Simulator::Now () << std::endl;
+}
+
+// end modification
 
 void
 NrBearerStatsCalculator::ShowResults (void)
@@ -634,6 +656,18 @@ NrBearerStatsCalculator::GetDlOutputFilename (void)
     {
       return m_dlPdcpOutputFilename;
     }
+}
+
+void
+NrBearerStatsCalculator::SetUeRlcBufferSizeFilename (std::string outputFilename)
+{
+  m_ueRlcbufferSizeOutputFilename = outputFilename;
+}
+
+std::string
+NrBearerStatsCalculator::GetUeRlcBufferSizeFilename (void)
+{
+  return m_ueRlcbufferSizeOutputFilename;
 }
 
 } // namespace ns3

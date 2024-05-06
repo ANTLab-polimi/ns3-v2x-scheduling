@@ -34,10 +34,12 @@ SlMobilityStats::SetDb (SQLiteOutput *db, const std::string & tableName)
   // NS_ASSERT (ret);
 
   ret = m_db->SpinExec ("CREATE TABLE IF NOT EXISTS " + tableName +
-                        "(Pos.X INTEGER NOT NULL,"
-                        "Pos.Y INTEGER NOT NULL,"
-                        "Vel.X INTEGER NOT NULL,"
-                        "Vel.Y INTEGER NOT NULL,"
+                        "(PosX INTEGER NOT NULL,"
+                        "PosY INTEGER NOT NULL,"
+                        "VelX INTEGER NOT NULL,"
+                        "VelY INTEGER NOT NULL,"
+                        "id INTEGER NOT NULL,"
+                        "deviceType VARCHAR(30) NOT NULL,"
                         "Seed INTEGER NOT NULL,"
                         "Run INTEGER NOT NULL,"
                         "TimeStamp DOUBLE NOT NULL);");
@@ -51,12 +53,14 @@ SlMobilityStats::SetDb (SQLiteOutput *db, const std::string & tableName)
 }
 
 void
-SlMobilityStats::SaveSlMobilityStats (Vector pos, Vector vel)
+SlMobilityStats::SaveSlMobilityStats (Vector pos, Vector vel, uint64_t id, std::string deviceType)
 {
 	MobilityCache c;
   c.timeInstance = Simulator::Now();
   c.pos = pos;
   c.vel = vel;
+  c.id = id;
+  c.deviceType = deviceType;
 
   m_mobilityCache.emplace_back (c);
 
@@ -95,7 +99,7 @@ void SlMobilityStats::WriteCache ()
   for (const auto & v : m_mobilityCache)
 	{
 	  sqlite3_stmt *stmt;
-	  ret = m_db->SpinPrepare (&stmt, "INSERT INTO " + m_tableName + " VALUES (?,?,?,?,?,?,?);");
+	  ret = m_db->SpinPrepare (&stmt, "INSERT INTO " + m_tableName + " VALUES (?,?,?,?,?,?,?,?,?);");
 	  NS_ASSERT (ret);
 	  ret = m_db->Bind (stmt, 1, static_cast<int> (v.pos.x));
 	  NS_ASSERT (ret);
@@ -104,15 +108,19 @@ void SlMobilityStats::WriteCache ()
 	  ret = m_db->Bind (stmt, 3, static_cast<int> (v.vel.x));
 	  NS_ASSERT (ret);
 	  ret = m_db->Bind (stmt, 4, static_cast<int> (v.vel.y));
+    NS_ASSERT (ret);
+	  ret = m_db->Bind (stmt, 5, static_cast<uint32_t> (v.id));
 	  NS_ASSERT (ret);
-	  ret = m_db->Bind (stmt, 5, RngSeedManager::GetSeed ());
+	  ret = m_db->Bind (stmt, 6, v.deviceType);
 	  NS_ASSERT (ret);
-	  ret = m_db->Bind (stmt, 6, static_cast<uint32_t> (RngSeedManager::GetRun ()));
+	  ret = m_db->Bind (stmt, 7, RngSeedManager::GetSeed ());
+	  NS_ASSERT (ret);
+	  ret = m_db->Bind (stmt, 8, static_cast<uint32_t> (RngSeedManager::GetRun ()));
 	  // NS_ASSERT (ret);
     // ret = m_db->Bind (stmt, 4, static_cast<uint32_t> (MpiInterface::GetSystemId ()));
     NS_ASSERT (ret);
 	  // insert the timestamp
-	  ret = m_db->Bind (stmt, 7, v.timeInstance);
+	  ret = m_db->Bind (stmt, 9, v.timeInstance);
 	  NS_ASSERT (ret);
 
 	  ret = m_db->SpinExec (stmt);

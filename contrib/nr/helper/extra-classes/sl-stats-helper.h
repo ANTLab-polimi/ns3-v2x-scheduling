@@ -50,7 +50,7 @@
 #include "ns3/ue-phy-pscch-rx-output-stats.h"
 #include "ns3/ue-phy-pssch-rx-output-stats.h"
 #include "ns3/ue-to-ue-pkt-txrx-output-stats.h"
-#include "ns3/ue-v2x-scheduling-xapp-stats.h"
+#include "ns3/ue-v2x-scheduling-stats.h"
 
 // Stats necessary to extract the information
 #include "ns3/nr-spectrum-value-helper.h"
@@ -103,7 +103,7 @@ public:
 	static void 
 	BulkApplicationTxPacketSingle(Ptr<const Packet> p);
 
-	static void CourseChange (SlMobilityStats *stats, Ptr<const MobilityModel> mobility);
+	static void CourseChange (SlMobilityStats *stats, Ptr<NetDevice> dev, std::string deviceType, Ptr<const MobilityModel> mobility);
 
 	static void
 	ReportSinrNr (SlSinrOutputStats *stats, uint16_t cellId, uint16_t rnti,
@@ -190,7 +190,11 @@ public:
 	*/
 
 	static void 
-	NotifyxAppScheduling(UeV2XSchedulingXApp* v2xSchedStats, Ptr<NrGnbPhy> gnbPhyPtr, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo, std::string plmnId);
+	NotifyxAppScheduling(UeV2XScheduling* v2xSchedStats, Ptr<NrGnbPhy> gnbPhyPtr, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo, std::string plmnId);
+
+
+	static void 
+	NotifyUeScheduling(UeV2XScheduling* v2xSchedStats, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo);
 
 
 	/**

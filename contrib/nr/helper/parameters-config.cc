@@ -64,17 +64,17 @@ ParametersConfig::EnableTraces()
 //   LogComponentEnable ("MmWaveFlexTtiMaxWeightMacScheduler", LOG_LEVEL_ALL);
 // 	LogComponentEnable ("MmWaveFlexTtiMaxRateMacScheduler", LOG_LEVEL_ALL);
   
-  LogComponentEnable ("E2Termination", logLevel);
+//   LogComponentEnable ("E2Termination", logLevel);
 
 //   LogComponentEnable ("LteEnbNetDevice", logLevel);
 //   LogComponentEnable ("CttcNrV2xTest", logLevel);
 //   LogComponentEnable ("MmWaveEnbPhy", logLevel);
 // LogComponentEnable("LteEnbRrc", logLevel);
 //   LogComponentEnable ("VideoStreamServerHelper", LOG_LEVEL_ALL);
-  LogComponentEnable ("NrHelper", logLevel);
+//   LogComponentEnable ("NrHelper", logLevel);
 //   LogComponentEnable ("MultiModelSpectrumChannel", LOG_LEVEL_ALL);
 //   LogComponentEnable ("NrGnbNetDevice", logLevel);
-  LogComponentEnable ("NrUeMac", logLevel);
+//   LogComponentEnable ("NrUeMac", logLevel);
 //   LogComponentEnable ("MmWaveSpectrumPhy", logLevel);
 
 	// LogComponentEnable ("MmWaveUePhy", LOG_LEVEL_ALL);

@@ -164,12 +164,21 @@ void SlStatsHelper::CwndChange (uint32_t oldCwnd, uint32_t newCwnd){
 
 
 void
-SlStatsHelper::CourseChange (SlMobilityStats *stats, Ptr<const MobilityModel> mobility)
+SlStatsHelper::CourseChange (SlMobilityStats *stats, Ptr<NetDevice> dev, std::string deviceType, Ptr<const MobilityModel> mobility)
 {
-  Vector pos = mobility->GetPosition (); // Get position
-  Vector vel = mobility->GetVelocity (); // Get velocity
+	Ptr<NrUeNetDevice> devUe = DynamicCast<NrUeNetDevice> (dev);
+	Ptr<NrGnbNetDevice> devGnb = DynamicCast<NrGnbNetDevice> (dev);
+	Vector pos = mobility->GetPosition (); // Get position
+	Vector vel = mobility->GetVelocity (); // Get velocityW
 
-  stats->SaveSlMobilityStats(pos, vel);
+	if (devUe!= nullptr){
+		stats->SaveSlMobilityStats(pos, vel, devUe->GetImsi(), deviceType);
+	}else if (devGnb!=nullptr)
+	{
+		stats->SaveSlMobilityStats(pos, vel, devGnb->GetCellId(), deviceType);
+	}
+	
+	
 }
 
 void
@@ -964,8 +973,13 @@ SlStatsHelper::PrintGnuplottableUeListToFile(std::string filename)
 
 
 void 
-SlStatsHelper::NotifyxAppScheduling(UeV2XSchedulingXApp* v2xSchedStats, Ptr<NrGnbPhy> gnbPhyPtr, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo, std::string plmnId){
+SlStatsHelper::NotifyxAppScheduling(UeV2XScheduling* v2xSchedStats, Ptr<NrGnbPhy> gnbPhyPtr, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo, std::string plmnId){
   v2xSchedStats->Save(ueId, nrSlGrantInfo, plmnId, gnbPhyPtr->GetCurrentSfnSf());
+}
+
+void 
+SlStatsHelper::NotifyUeScheduling(UeV2XScheduling* v2xSchedStats, uint64_t ueId, ns3::NrSlGrantInfo nrSlGrantInfo){
+  v2xSchedStats->SaveUeSched(ueId, nrSlGrantInfo);
 }
 
 void 

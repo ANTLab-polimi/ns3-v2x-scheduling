@@ -458,7 +458,11 @@ NrUeMac::GetTypeId (void)
                     "E2 packet delay report to send to the gnb for the xapp",
                     MakeTraceSourceAccessor (&NrUeMac::m_e2PacketDelayReportTrace),
                     "ns3::NrUeMac::E2PacketDelayReportTracedCallback")
-    
+    .AddTraceSource ("UeSlV2XScheduling",
+                     "The traces which shall be activated when gnb receives scheduling from the xApp"
+                     "This shall be captured by the ues at the end and treated as control message",
+                     MakeTraceSourceAccessor (&NrUeMac::m_ueV2XSchedulingTrace), 
+                     "ns3::NrGnbNetDevice::SlV2XSchedulingTracedCallback")
     // end modification
     ;
 
@@ -2159,12 +2163,14 @@ NrUeMac::DoSchedUeNrSlConfigInd (const std::set<NrSlSlotAlloc>& slotAllocList)
     {
       NrSlGrantInfo grant = CreateGrantInfo (slotAllocList);
       itGrantInfo = m_grantInfo.emplace (std::make_pair (slotAllocList.begin ()->dstL2Id, grant)).first;
+      m_ueV2XSchedulingTrace(slotAllocList.begin ()->dstL2Id, grant);
     }
   else
     {
       NS_ASSERT_MSG (itGrantInfo->second.slResoReselCounter == 0, "Sidelink resource counter must be zero before assigning new grant for dst " << slotAllocList.begin ()->dstL2Id);
       NrSlGrantInfo grant = CreateGrantInfo (slotAllocList);
       itGrantInfo->second = grant;
+      m_ueV2XSchedulingTrace(itGrantInfo->first, grant);
     }
 
   NS_ASSERT_MSG (itGrantInfo->second.slotAllocations.size () > 0, "CreateGrantInfo failed to create grants");
@@ -2772,9 +2778,6 @@ NrUeMac::SendE2BufferDelayReport(){
     x = mm->GetPosition().x;
     y = mm->GetPosition().y;
   }
-
-  // m_nrSlHarq->
-  // updating the harq buffer
 
   std::map<uint16_t, ns3::PacketDelayStruct> packetDelayMap;
   std::copy_if(m_packetDelayMap.begin(), m_packetDelayMap.end(),

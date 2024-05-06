@@ -132,6 +132,23 @@ UlRxPduCallback (Ptr<NrBoundCallbackArgument> arg, std::string path,
   arg->stats->UlRxPdu (arg->cellId, arg->imsi, rnti, lcid, packetSize, delay);
 }
 
+/**
+ * Callback function for ue rlc buffer size statistics
+ * /param arg
+ * /param path
+ * /param rnti
+ * /param lcid
+ * /param packetSize
+ * /param delay
+ */
+void
+UeRlcBufferSizeCallback (Ptr<NrBoundCallbackArgument> arg, std::string path,
+ uint32_t rlcBufferSize, uint32_t rlcMaxBufferSize)
+{
+  NS_LOG_FUNCTION (path << " rlc buff size " << rlcBufferSize << " max size " << rlcMaxBufferSize);
+  arg->stats->UeRlcBufferSize (arg->cellId, arg->imsi, rlcBufferSize, rlcMaxBufferSize);
+}
+
 
 
 NrBearerStatsConnector::NrBearerStatsConnector ()
@@ -271,6 +288,11 @@ NrBearerStatsConnector::ConnectSrb0Traces (std::string context, uint64_t imsi, u
                           MakeBoundCallback (&UlTxPduCallback, arg));
       Config::Disconnect (ueRrcPath + "/Srb0/LteRlc/RxPDU",
                           MakeBoundCallback (&DlRxPduCallback, arg));
+      // modified
+      // the buffer size of ue rlc
+      Config::Disconnect (ueRrcPath + "/Srb0/LteRlc/BufferSize",
+                          MakeBoundCallback (&UeRlcBufferSizeCallback, arg));
+      // end modification
       Config::Disconnect (ueManagerPath + "/Srb0/LteRlc/TxPDU",
                           MakeBoundCallback (&DlTxPduCallback, arg));
       Config::Disconnect (ueManagerPath + "/Srb0/LteRlc/RxPDU",
@@ -281,6 +303,10 @@ NrBearerStatsConnector::ConnectSrb0Traces (std::string context, uint64_t imsi, u
                        MakeBoundCallback (&UlTxPduCallback, arg));
       Config::Connect (ueRrcPath + "/Srb0/LteRlc/RxPDU",
                        MakeBoundCallback (&DlRxPduCallback, arg));
+      // modified
+      Config::Connect (ueRrcPath + "/Srb0/LteRlc/BufferSize",
+                          MakeBoundCallback (&UeRlcBufferSizeCallback, arg));
+      // end modification
       Config::Connect (ueManagerPath + "/Srb0/LteRlc/TxPDU",
                        MakeBoundCallback (&DlTxPduCallback, arg));
       Config::Connect (ueManagerPath + "/Srb0/LteRlc/RxPDU",
@@ -377,6 +403,14 @@ NrBearerStatsConnector::ConnectTracesUe (std::string context, uint64_t imsi, uin
                        MakeBoundCallback (&UlTxPduCallback, arg));
       Config::Connect (basePath + "/Srb1/LteRlc/RxPDU",
                        MakeBoundCallback (&DlRxPduCallback, arg));
+      // modified
+      Config::Connect (basePath + "/DataRadioBearerMap/*/LteRlc/BufferSize",
+                       MakeBoundCallback (&UeRlcBufferSizeCallback, arg));
+      Config::Connect (basePath + "/Srb0/LteRlc/BufferSize",
+                       MakeBoundCallback (&UeRlcBufferSizeCallback, arg));
+      Config::Connect (basePath + "/Srb1/LteRlc/BufferSize",
+                       MakeBoundCallback (&UeRlcBufferSizeCallback, arg));
+      // end modification
 
     }
   if (m_pdcpStats)

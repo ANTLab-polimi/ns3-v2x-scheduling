@@ -332,6 +332,8 @@ ThreeGppSpectrumPropagationLossModel::DoCalcRxPowerSpectralDensity (Ptr<const Sp
   uint32_t aId = a->GetObject<Node> ()->GetId (); // id of the node a
   uint32_t bId = b->GetObject<Node> ()->GetId (); // id of the node b
 
+  NS_LOG_DEBUG("aid" << aId << " bid " << bId << " a pos " << a->GetPosition() << " b pos " << b->GetPosition());
+
   NS_ASSERT (aId != bId);
   NS_ASSERT_MSG (a->GetDistanceFrom (b) > 0.0, "The position of a and b devices cannot be the same");
 

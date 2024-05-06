@@ -16,18 +16,18 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#include "ue-v2x-scheduling-xapp-stats.h"
+#include "ue-v2x-scheduling-stats.h"
 
 #include <ns3/core-module.h>
 
 namespace ns3 {
 
-UeV2XSchedulingXApp::UeV2XSchedulingXApp ()
+UeV2XScheduling::UeV2XScheduling ()
 {
 }
 
 void
-UeV2XSchedulingXApp::SetDb (SQLiteOutput *db, const std::string &tableName)
+UeV2XScheduling::SetDb (SQLiteOutput *db, const std::string &tableName)
 {
   m_db = db;
   m_tableName = tableName;
@@ -74,12 +74,12 @@ UeV2XSchedulingXApp::SetDb (SQLiteOutput *db, const std::string &tableName)
 
   NS_ABORT_UNLESS (ret);
 
-  UeV2XSchedulingXApp::DeleteWhere (m_db, RngSeedManager::GetSeed (),
+  UeV2XScheduling::DeleteWhere (m_db, RngSeedManager::GetSeed (),
                                        RngSeedManager::GetRun(), tableName);
 }
 
 void
-UeV2XSchedulingXApp::Save (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo, std::string plmnId, const SfnSf & sfnsf)
+UeV2XScheduling::Save (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo, std::string plmnId, const SfnSf & sfnsf)
 {
     UeV2XSchedulingParameters data (ueId);
 
@@ -97,13 +97,31 @@ UeV2XSchedulingXApp::Save (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo, std::stri
 }
 
 void
-UeV2XSchedulingXApp::EmptyCache()
+UeV2XScheduling::SaveUeSched (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo)
+{
+    UeV2XSchedulingParameters data (ueId);
+
+    data.timeMs = Simulator::Now().GetMilliSeconds();
+    data.nrSlGrantInfo = nrSlGrantInfo;
+    data.plmnId = "";
+    data.currSfnSf = SfnSf();
+    m_v2xXAppSchedulingCache.emplace_back (data);
+
+  // Let's wait until ~1MB of entries before storing it in the database
+  if (m_v2xXAppSchedulingCache.size () * sizeof (UeV2XSchedulingParameters) > 1000)
+    {
+      WriteCache ();
+    }
+}
+
+void
+UeV2XScheduling::EmptyCache()
 {
   WriteCache ();
 }
 
 void
-UeV2XSchedulingXApp::WriteCache ()
+UeV2XScheduling::WriteCache ()
 {
   bool ret = m_db->SpinExec ("BEGIN TRANSACTION;");
   for (const auto & v : m_v2xXAppSchedulingCache)
@@ -197,7 +215,7 @@ UeV2XSchedulingXApp::WriteCache ()
 }
 
 void
-UeV2XSchedulingXApp::DeleteWhere (SQLiteOutput *p, uint32_t seed,
+UeV2XScheduling::DeleteWhere (SQLiteOutput *p, uint32_t seed,
                                            uint32_t run, const std::string &table)
 {
   bool ret;

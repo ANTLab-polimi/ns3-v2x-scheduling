@@ -1686,6 +1686,11 @@ void
 NrHelper::EnableRlcSimpleTraces (void)
 {
   Ptr<NrBearerStatsSimple> rlcStats = CreateObject<NrBearerStatsSimple> ("RLC");
+  rlcStats->SetAttribute("UeRlcBufferSizeOutputFilename", StringValue(m_tracesPath + "UeRlcBufferSizeStats.txt"));
+  rlcStats->SetAttribute("DlRlcTxOutputFilename", StringValue(m_tracesPath + "NrDlTxRlcStats.txt"));
+  rlcStats->SetAttribute("DlRlcRxOutputFilename", StringValue(m_tracesPath + "NrDlRxRlcStats.txt"));
+  rlcStats->SetAttribute("UlRlcTxOutputFilename", StringValue(m_tracesPath + "NrUlRlcTxStats.txt"));
+  rlcStats->SetAttribute("UlRlcRxOutputFilename", StringValue(m_tracesPath + "NrUlRlcRxStats.txt"));
   m_radioBearerStatsConnectorSimpleTraces.EnableRlcStats (rlcStats);
 }
 
@@ -1693,6 +1698,10 @@ void
 NrHelper::EnablePdcpSimpleTraces (void)
 {
   Ptr<NrBearerStatsSimple> pdcpStats = CreateObject<NrBearerStatsSimple> ("PDCP");
+  pdcpStats->SetAttribute("DlPdcpTxOutputFilename", StringValue(m_tracesPath + "NrDlPdcpTxStats.txt"));
+  pdcpStats->SetAttribute("DlPdcpRxOutputFilename", StringValue(m_tracesPath + "NrDlPdcpRxStats.txt"));
+  pdcpStats->SetAttribute("UlPdcpTxOutputFilename", StringValue(m_tracesPath + "NrUlPdcpTxStats.txt"));
+  pdcpStats->SetAttribute("UlPdcpRxOutputFilename", StringValue(m_tracesPath + "NrUlPdcpRxStats.txt"));
   m_radioBearerStatsConnectorSimpleTraces.EnablePdcpStats (pdcpStats);
 }
 
@@ -1700,6 +1709,10 @@ void
 NrHelper::EnableRlcE2eTraces (void)
 {
   Ptr<NrBearerStatsCalculator> rlcStats = CreateObject<NrBearerStatsCalculator> ("RLC");
+
+  rlcStats->SetAttribute("UeRlcBufferSizeOutputFilename", StringValue(m_tracesPath + "UeRlcBufferSizeStats.txt"));
+  rlcStats->SetAttribute("DlRlcOutputFilename", StringValue(m_tracesPath + "NrDlRlcStatsE2E.txt"));
+  rlcStats->SetAttribute("UlRlcOutputFilename", StringValue(m_tracesPath + "NrUlRlcStatsE2E.txt"));
   m_radioBearerStatsConnectorCalculator.EnableRlcStats (rlcStats);
 }
 
@@ -1707,6 +1720,8 @@ void
 NrHelper::EnablePdcpE2eTraces (void)
 {
   Ptr<NrBearerStatsCalculator> pdcpStats = CreateObject<NrBearerStatsCalculator> ("PDCP");
+  pdcpStats->SetAttribute("DlPdcpOutputFilename", StringValue(m_tracesPath + "NrDlPdcpStatsE2E.txt"));
+  pdcpStats->SetAttribute("UlPdcpOutputFilename", StringValue(m_tracesPath + "NrUlPdcpStatsE2E.txt"));
   m_radioBearerStatsConnectorCalculator.EnablePdcpStats (pdcpStats);
 }
 

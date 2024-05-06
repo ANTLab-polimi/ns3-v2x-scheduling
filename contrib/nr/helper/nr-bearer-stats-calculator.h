@@ -96,6 +96,30 @@ public:
    */
   static TypeId GetTypeId (void);
   virtual void DoDispose () override;
+
+  // modified
+  /**
+   * @brief insert the statistics in the file
+   * 
+   * @param cellId 
+   * @param bufferSize 
+   * @param maxBufferSize 
+   */
+
+
+  void UeRlcBufferSize (uint16_t cellId, uint64_t imsi, uint32_t bufferSize, uint32_t maxBufferSize);
+
+  void SetUeRlcBufferSizeFilename (std::string outputFilename);
+
+  /**
+   * Get the name of the file where the Gnb Rlc buffer statistics will be stored.
+   * @return the name of the file where the Gnb Rlc buffer statistics will be stored
+   */
+
+  std::string GetUeRlcBufferSizeFilename (void);
+
+  // end modification
+
   /**
    *
    * \param t the value of the StartTime attribute
@@ -365,6 +389,17 @@ private:
   std::string m_ulPdcpOutputFilename;
   std::ofstream m_dlOutFile;
   std::ofstream m_ulOutFile;
+
+  // modified
+
+  /***
+   * @brief name of the file for the ue rlc buffer size
+  */
+
+  std::string m_ueRlcbufferSizeOutputFilename;
+  std::ofstream m_ueRlcBufferSizeFile;
+
+  // end modification
 };
 
 } // namespace ns3
