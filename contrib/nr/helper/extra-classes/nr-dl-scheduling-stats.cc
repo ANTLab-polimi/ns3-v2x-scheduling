@@ -32,10 +32,11 @@ SlDlSchedulingStats::SlDlSchedulingStats ()
 }
 
 void
-SlDlSchedulingStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlDlSchedulingStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -82,7 +83,7 @@ SlDlSchedulingStats::SaveSlDlSchedulingStats (uint16_t frame, uint8_t subframe, 
   m_dlSchedulingCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_dlSchedulingCache.size () * sizeof (SlDlSchedulingCache) > 10)
+  if (m_dlSchedulingCache.size () * sizeof (SlDlSchedulingCache) > m_writeSize)
     {
       WriteCache ();
     }

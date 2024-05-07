@@ -74,7 +74,7 @@ public:
    * the same name, also clean existing values that has the same
    * Seed/Run pair.
    */
-  void SetDb (SQLiteOutput *db, const std::string& tableName = "power");
+  void SetDb (SQLiteOutput *db, const std::string& tableName = "power", uint32_t writeSize = 100000);
 
   /**
    * \brief Store power values
@@ -124,6 +124,7 @@ private:
   SQLiteOutput *m_db;                           //!< DB pointer
   std::vector<SlPowerResultCache> m_powerCache;   //!< Result cache
   std::string m_tableName;                      //!< Table name
+  uint32_t m_writeSize;
 };
 
 } // namespace ns3

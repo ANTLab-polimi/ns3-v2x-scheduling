@@ -33,10 +33,11 @@ SlRbOutputStats::SlRbOutputStats ()
 }
 
 void
-SlRbOutputStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlRbOutputStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -81,7 +82,7 @@ SlRbOutputStats::SaveRbStats (const SfnSf &sfnSf, uint8_t sym, const std::vector
   // Let's wait until ~500 KB of entries before storing it in the database.
   // the entries value is an approximation, as the vector of RB size can
   // vary.
-  if (m_slotCache.size () * c.GetSize () > 100) // 1000000
+  if (m_slotCache.size () * c.GetSize () > m_writeSize) // 1000000
     {
       WriteCache ();
     }

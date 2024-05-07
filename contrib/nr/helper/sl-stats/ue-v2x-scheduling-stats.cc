@@ -27,10 +27,11 @@ UeV2XScheduling::UeV2XScheduling ()
 }
 
 void
-UeV2XScheduling::SetDb (SQLiteOutput *db, const std::string &tableName)
+UeV2XScheduling::SetDb (SQLiteOutput *db, const std::string &tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -90,7 +91,7 @@ UeV2XScheduling::Save (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo, std::string p
     m_v2xXAppSchedulingCache.emplace_back (data);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_v2xXAppSchedulingCache.size () * sizeof (UeV2XSchedulingParameters) > 1000)
+  if (m_v2xXAppSchedulingCache.size () * sizeof (UeV2XSchedulingParameters) > m_writeSize)
     {
       WriteCache ();
     }
@@ -108,7 +109,7 @@ UeV2XScheduling::SaveUeSched (uint64_t ueId, NrSlGrantInfo nrSlGrantInfo)
     m_v2xXAppSchedulingCache.emplace_back (data);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_v2xXAppSchedulingCache.size () * sizeof (UeV2XSchedulingParameters) > 1000)
+  if (m_v2xXAppSchedulingCache.size () * sizeof (UeV2XSchedulingParameters) > m_writeSize)
     {
       WriteCache ();
     }

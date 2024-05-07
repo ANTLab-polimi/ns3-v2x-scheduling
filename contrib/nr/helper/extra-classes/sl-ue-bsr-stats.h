@@ -57,7 +57,7 @@ class SlMacUeBsrStats{
    * the same name, also clean existing values that has the same
    * Seed/Run pair.
    */
-  void SetDb (SQLiteOutput *db, const std::string& tableName = "macUeBsr");
+  void SetDb (SQLiteOutput *db, const std::string& tableName = "macUeBsr", uint32_t writeSize = 100000);
 
   /**
    * \brief Save the slot statistics
@@ -92,7 +92,7 @@ private:
   SQLiteOutput *m_db;                         //!< DB pointer
   std::vector<SlMacUeBsrCache> m_macUeBsrCache;         //!< Result cache
   std::string m_tableName;  
-
+  uint32_t m_writeSize;
 
 };
 

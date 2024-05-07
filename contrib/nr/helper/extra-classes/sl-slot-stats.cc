@@ -34,10 +34,11 @@ SlPhySlotStats::SlPhySlotStats ()
 }
 
 void
-SlPhySlotStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlPhySlotStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -90,7 +91,7 @@ SlPhySlotStats::SaveSlPhySlotStats (const SfnSf &sfnSf, uint16_t rnti,
   m_phySlotCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_phySlotCache.size () * sizeof (SlPhySlotCache) > 100) // 1000000
+  if (m_phySlotCache.size () * sizeof (SlPhySlotCache) > m_writeSize) // 1000000
     {
       WriteCache ();
     }

@@ -22,10 +22,11 @@ SlMobilityStats::SlMobilityStats ()
 }
 
 void
-SlMobilityStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlMobilityStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -65,7 +66,7 @@ SlMobilityStats::SaveSlMobilityStats (Vector pos, Vector vel, uint64_t id, std::
   m_mobilityCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_mobilityCache.size () * sizeof (MobilityCache) > 10) // 1000000
+  if (m_mobilityCache.size () * sizeof (MobilityCache) > m_writeSize) // 1000000
     {
       WriteCache ();
     }

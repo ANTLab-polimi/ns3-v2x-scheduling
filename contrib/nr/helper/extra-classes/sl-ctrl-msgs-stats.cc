@@ -22,10 +22,11 @@ SlCtrlMsgsStats::SlCtrlMsgsStats ()
 }
 
 void
-SlCtrlMsgsStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlCtrlMsgsStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -72,7 +73,7 @@ SlCtrlMsgsStats::SaveCtrlMsgStats (std::string layer, std::string entity, uint16
   m_ctrlMsgsCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_ctrlMsgsCache.size () * sizeof (SlCtrlMsgsStats) > 10) // 00000
+  if (m_ctrlMsgsCache.size () * sizeof (SlCtrlMsgsStats) > m_writeSize) // 00000
     {
       WriteCache ();
     }

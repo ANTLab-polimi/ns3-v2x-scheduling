@@ -22,10 +22,11 @@ SlUplinkTbSizeStats::SlUplinkTbSizeStats ()
 }
 
 void
-SlUplinkTbSizeStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlUplinkTbSizeStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -59,7 +60,7 @@ SlUplinkTbSizeStats::SaveUlTbSizeStats (uint64_t imsi, uint64_t tb)
   m_uplinkTbSizeCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_uplinkTbSizeCache.size () * sizeof (SlUplinkTbSizeCache) > 100) // 0000
+  if (m_uplinkTbSizeCache.size () * sizeof (SlUplinkTbSizeCache) > m_writeSize) // 0000
     {
       WriteCache ();
     }

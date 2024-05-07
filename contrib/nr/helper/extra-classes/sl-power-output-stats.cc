@@ -31,10 +31,11 @@ SlPowerOutputStats::SlPowerOutputStats (){
 }
 
 void
-SlPowerOutputStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlPowerOutputStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -107,7 +108,7 @@ void SlPowerOutputStats::SavePower(const SfnSf &sfnSf, Ptr<const SpectrumValue> 
   m_powerCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_powerCache.size () * sizeof (SlPowerResultCache) > 100)
+  if (m_powerCache.size () * sizeof (SlPowerResultCache) > m_writeSize)
     {
       WriteCache ();
     }

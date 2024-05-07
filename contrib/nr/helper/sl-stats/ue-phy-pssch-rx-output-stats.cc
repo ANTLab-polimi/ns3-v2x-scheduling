@@ -27,10 +27,11 @@ UePhyPsschRxOutputStats::UePhyPsschRxOutputStats ()
 }
 
 void
-UePhyPsschRxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName)
+UePhyPsschRxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -75,7 +76,7 @@ UePhyPsschRxOutputStats::Save (const SlRxDataPacketTraceParams psschStatsParams)
   m_psschCache.emplace_back (psschStatsParams);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_psschCache.size () * sizeof (SlRxDataPacketTraceParams) > 1000) // 000
+  if (m_psschCache.size () * sizeof (SlRxDataPacketTraceParams) > m_writeSize) // 000
     {
       WriteCache ();
     }

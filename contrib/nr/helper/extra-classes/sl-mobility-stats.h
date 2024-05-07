@@ -52,7 +52,7 @@ public:
    * the same name, also clean existing values that has the same
    * Seed/Run pair.
    */
-  void SetDb (SQLiteOutput *db, const std::string& tableName = "mobility");
+  void SetDb (SQLiteOutput *db, const std::string& tableName = "mobility", uint32_t writeSize = 100000);
 
   /**
    * \brief Save the slot statistics
@@ -84,6 +84,7 @@ private:
   SQLiteOutput *m_db;                         //!< DB pointer
   std::vector<MobilityCache> m_mobilityCache;         //!< Result cache
   std::string m_tableName;                    //!< Table name
+  uint32_t m_writeSize;
 };
 
 } // namespace ns3

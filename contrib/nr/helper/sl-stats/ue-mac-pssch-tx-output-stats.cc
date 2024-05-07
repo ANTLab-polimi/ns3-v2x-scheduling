@@ -27,10 +27,11 @@ UeMacPsschTxOutputStats::UeMacPsschTxOutputStats ()
 }
 
 void
-UeMacPsschTxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName)
+UeMacPsschTxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -72,7 +73,7 @@ UeMacPsschTxOutputStats::Save (const SlPsschUeMacStatParameters psschStatsParams
   m_psschCache.emplace_back (psschStatsParams);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_psschCache.size () * sizeof (SlPsschUeMacStatParameters) > 1000) // 0000
+  if (m_psschCache.size () * sizeof (SlPsschUeMacStatParameters) > m_writeSize) // 0000
     {
       WriteCache ();
     }

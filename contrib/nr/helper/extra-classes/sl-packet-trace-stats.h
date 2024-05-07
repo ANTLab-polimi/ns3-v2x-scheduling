@@ -60,7 +60,7 @@ public:
    * the same name, also clean existing values that has the same
    * Seed/Run pair.
    */
-  void SetDb (SQLiteOutput *db, const std::string& tableName = "packetTrace");
+  void SetDb (SQLiteOutput *db, const std::string& tableName = "packetTrace", uint32_t writeSize = 100000);
 
   /**
    * \brief Store power values
@@ -99,6 +99,7 @@ private:
   SQLiteOutput *m_db;                           //!< DB pointer
   std::vector<SlPacketTraceCache> m_packetTraceCache;   //!< Result cache
   std::string m_tableName;                      //!< Table name
+  uint32_t m_writeSize;
 };
 
 }

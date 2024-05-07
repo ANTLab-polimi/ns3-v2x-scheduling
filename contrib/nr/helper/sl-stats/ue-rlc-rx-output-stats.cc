@@ -28,10 +28,11 @@ UeRlcRxOutputStats::UeRlcRxOutputStats ()
 }
 
 void
-UeRlcRxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName)
+UeRlcRxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -63,7 +64,7 @@ UeRlcRxOutputStats::Save (uint64_t imsi, uint16_t rnti,
   m_rlcRxDataCache.emplace_back (data);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_rlcRxDataCache.size () * sizeof (SlPscchUeMacStatParameters) > 1000) // 000
+  if (m_rlcRxDataCache.size () * sizeof (SlPscchUeMacStatParameters) > m_writeSize) // 000
     {
       WriteCache ();
     }

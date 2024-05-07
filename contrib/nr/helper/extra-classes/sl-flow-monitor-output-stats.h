@@ -71,7 +71,7 @@ public:
    * the same name, also clean existing values that has the same
    * Seed/Run pair.
    */
-  void SetDb (SQLiteOutput *db, const std::string & tableName);
+  void SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize = 100000);
 
   /**
    * \brief Store the flow monitor output in the database
@@ -87,6 +87,7 @@ private:
 
   SQLiteOutput *m_db;
   std::string m_tableName;
+  uint32_t m_writeSize;
 };
 
 } // namespace ns3

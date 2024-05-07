@@ -29,10 +29,11 @@ UeToUePktTxRxOutputStats::UeToUePktTxRxOutputStats ()
 }
 
 void
-UeToUePktTxRxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName)
+UeToUePktTxRxOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -69,7 +70,7 @@ UeToUePktTxRxOutputStats::Save (const std::string txRx, const Address &localAddr
                                                 seq));
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_pktCache.size () * sizeof (UePacketResultCache) > 1000) // 000
+  if (m_pktCache.size () * sizeof (UePacketResultCache) > m_writeSize) // 000
     {
       WriteCache ();
     }

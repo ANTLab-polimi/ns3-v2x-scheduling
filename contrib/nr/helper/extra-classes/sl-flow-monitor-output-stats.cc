@@ -32,10 +32,11 @@ SlFlowMonitorOutputStats::SlFlowMonitorOutputStats ()
 }
 
 void
-SlFlowMonitorOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName)
+SlFlowMonitorOutputStats::SetDb (SQLiteOutput *db, const std::string &tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 

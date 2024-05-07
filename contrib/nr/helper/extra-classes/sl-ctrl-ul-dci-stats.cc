@@ -31,10 +31,11 @@ SlCtrlUlDciStats::SlCtrlUlDciStats ()
 }
 
 void
-SlCtrlUlDciStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlCtrlUlDciStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -134,7 +135,7 @@ SlCtrlUlDciStats::SaveSlCtrlUlDciStats (uint16_t cellId, uint16_t rnti, const Sf
   m_ctrlUlDciCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_ctrlUlDciCache.size () * sizeof (SlCtrlUlDciCache) > 10)// 00000
+  if (m_ctrlUlDciCache.size () * sizeof (SlCtrlUlDciCache) > m_writeSize)// 00000
     {
       WriteCache ();
     }

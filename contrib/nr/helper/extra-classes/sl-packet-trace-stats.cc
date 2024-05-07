@@ -22,10 +22,11 @@ SlPacketTraceStats::SlPacketTraceStats ()
 }
 
 void
-SlPacketTraceStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlPacketTraceStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -78,7 +79,7 @@ SlPacketTraceStats::SavePacketTrace(std::string direction, RxPacketTraceParams p
   m_packetTraceCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_packetTraceCache.size () * sizeof (SlPacketTraceCache) > 100)
+  if (m_packetTraceCache.size () * sizeof (SlPacketTraceCache) > m_writeSize)
     {
       WriteCache ();
     }

@@ -33,10 +33,11 @@ SlUePssReceivedStats::SlUePssReceivedStats ()
 }
 
 void
-SlUePssReceivedStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlUePssReceivedStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -90,7 +91,7 @@ SlUePssReceivedStats::SavePss (const SfnSf &sfnsf, uint16_t cellId, uint16_t bwp
 //  m_sinrCache.emplace_back (SinrResultCache (cellId, bwpId, rnti, avgSinr));
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_uePssCache.size () * sizeof (SlUePssCache) > 100) // 0000
+  if (m_uePssCache.size () * sizeof (SlUePssCache) > m_writeSize) // 0000
     {
       WriteCache ();
     }

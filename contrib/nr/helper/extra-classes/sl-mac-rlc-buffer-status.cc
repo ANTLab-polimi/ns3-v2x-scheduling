@@ -24,10 +24,11 @@ SlMacBsrStats::SlMacBsrStats ()
 }
 
 void
-SlMacBsrStats::SetDb (SQLiteOutput *db, const std::string & tableName)
+SlMacBsrStats::SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize)
 {
   m_db = db;
   m_tableName = tableName;
+  m_writeSize = writeSize;
 
   bool ret;
 
@@ -80,7 +81,7 @@ SlMacBsrStats::SaveSlMacBsrStats (SfnSf sfnSf, uint16_t cellId, uint16_t rnti,
   m_macBsrCache.emplace_back (c);
 
   // Let's wait until ~1MB of entries before storing it in the database
-  if (m_macBsrCache.size () * sizeof (MacBsrCache) > 100) // 1000000
+  if (m_macBsrCache.size () * sizeof (MacBsrCache) > m_writeSize) // 1000000
     {
       WriteCache ();
     }

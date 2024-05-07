@@ -78,7 +78,7 @@ public:
    * the same name, also clean existing values that has the same
    * Seed/Run pair.
    */
-  void SetDb (SQLiteOutput *db, const std::string & tableName);
+  void SetDb (SQLiteOutput *db, const std::string & tableName, uint32_t writeSize = 100000);
 
   /**
    * \brief Store the PSCCH stats parameters into a local vector, which
@@ -129,6 +129,7 @@ private:
   SQLiteOutput *m_db {nullptr}; //!< DB pointer
   std::string m_tableName {"InvalidTableName"}; //!< table name
   std::vector<UeV2XSchedulingParameters> m_v2xXAppSchedulingCache;   //!< Result cache
+  uint32_t m_writeSize;
 };
 
 } // namespace ns3

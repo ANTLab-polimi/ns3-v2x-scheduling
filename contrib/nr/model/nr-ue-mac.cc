@@ -1692,6 +1692,9 @@ NrUeMac::DoReceivePsschPhyPdu (Ptr<PacketBurst> pdu)
       std::map <SidelinkLcIdentifier, SlLcInfoUeMac>::iterator it = m_nrSlLcInfoMap.find (identifier);
       if (it == m_nrSlLcInfoMap.end ())
         {
+          // modified
+          // continue;
+          // end modification
           //notify RRC to setup bearer
           m_nrSlUeCmacSapUser->NotifySidelinkReception (tag.GetLcid (), identifier.srcL2Id, identifier.dstL2Id);
 
