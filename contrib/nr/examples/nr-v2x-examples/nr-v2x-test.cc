@@ -166,7 +166,7 @@ main (int argc, char *argv[])
   double dataRateBe = 160; //16 kilobits per second
 
   // Simulation parameters.
-  Time simTime = Seconds (30);
+  Time simTime = Seconds (300);
   //Sidelink bearers activation time
   Time slBearersActivationTime = Seconds (2.0);
 
