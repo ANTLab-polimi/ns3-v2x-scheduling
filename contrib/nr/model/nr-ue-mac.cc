@@ -306,8 +306,8 @@ NrUeMac::V2xE2Scheduling(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo){
   if (m_imsi != ueId){
     return;
   }
-  std::cout << "UeMac:V2xE2Scheduling: " << "current slot " << m_currentSlot << 
-              " imsi" << m_imsi << " ueid " <<  ueId << std::endl;
+  // std::cout << "UeMac:V2xE2Scheduling: " << "current slot " << m_currentSlot << 
+  //             " imsi" << m_imsi << " ueid " <<  ueId << std::endl;
   // for (auto sched: nrSlGrantInfo.slotAllocations){
   //   NS_LOG_DEBUG(sched.sfn << " " << sched.dstL2Id << 
   //   " subch " << sched.slPsschSubChStart << sched.slPsschSubChLength << " " <<
@@ -321,7 +321,7 @@ NrUeMac::V2xE2Scheduling(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo){
     bool foundDest = itGrantInfo != m_grantInfoXapp.end () ? true : false;
     // NS_LOG_DEBUG("Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot);
     // std::cout << "Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
-    std::cout << "UeMac:V2xE2Scheduling: id " << nrSlSlotAllocIt->dstL2Id << " Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
+    // std::cout << "UeMac:V2xE2Scheduling: id " << nrSlSlotAllocIt->dstL2Id << " Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
     if (foundDest)
     {
       // we found the destination in the map
@@ -334,7 +334,7 @@ NrUeMac::V2xE2Scheduling(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo){
           // which are rescheduled in the new grant, thus we remove the old schedule
           // and update the value with the new schedules after
           NS_LOG_DEBUG("Future slots scheduling detected & removing " << slotAllocGrantXappIt->sfn << " new sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot);
-          std::cout << "V2xE2Scheduling: " << "Future slots scheduling detected & removing " << slotAllocGrantXappIt->sfn << " new sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
+          // std::cout << "V2xE2Scheduling: " << "Future slots scheduling detected & removing " << slotAllocGrantXappIt->sfn << " new sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
           itGrantInfo->second.slotAllocations.erase(slotAllocGrantXappIt, itGrantInfo->second.slotAllocations.end());
           break;
         }else{
@@ -346,7 +346,7 @@ NrUeMac::V2xE2Scheduling(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo){
       itGrantInfo->second.slotAllocations.insert((*nrSlSlotAllocIt));
       // NS_LOG_DEBUG()
     }else{
-       std::cout << " new insert in the map " << std::endl;
+      //  std::cout << " new insert in the map " << std::endl;
       // we haven't found it, thus we insert the whole grant
       m_grantInfoXapp.emplace (std::make_pair (nrSlGrantInfo.slotAllocations.begin ()->dstL2Id, nrSlGrantInfo));
     }
