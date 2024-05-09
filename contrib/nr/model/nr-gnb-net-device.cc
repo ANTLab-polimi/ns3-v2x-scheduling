@@ -1381,7 +1381,7 @@ NrGnbNetDevice::UpdateConfig (void)
 
   testE2Term = true;
 
-  if (testE2Term){
+  if ((m_e2term!=nullptr)&(testE2Term)){
     E2Termination::RicSubscriptionRequest_rval_s params{24, 0, 200, 1};
     Simulator::ScheduleWithContext (1, Seconds(2),
                                     &NrGnbNetDevice::BuildAndSendReportMessage, this, params);
