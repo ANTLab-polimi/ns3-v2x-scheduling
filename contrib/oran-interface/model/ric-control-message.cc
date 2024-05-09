@@ -256,8 +256,11 @@ RicControlMessage::DecodeRicControlMessage(E2AP_PDU_t* pdu)
                             uint32_t plmnIdSize = v2xSchedulingPlmnMessage_Format->plmn_id.size;
                             m_plmnString.assign((const char *)v2xSchedulingPlmnMessage_Format->plmn_id.buf, plmnIdSize);
 
+                            
 
                             V2X_Scheduling_All_Users_t *v2XSchedulingMessage_Format = v2xSchedulingPlmnMessage_Format->v2XSchedulingAllUsersList;
+                            
+                            NS_LOG_DEBUG("MEssage plmnd " << m_plmnString<< " count " << (uint32_t) v2XSchedulingMessage_Format->list.count);
                             if (v2XSchedulingMessage_Format->list.count == 0){
                                 // it means this is the last sent report,
                                 // we set continue simulation to true

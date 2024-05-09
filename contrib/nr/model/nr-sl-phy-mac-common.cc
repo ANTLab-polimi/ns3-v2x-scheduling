@@ -25,7 +25,13 @@ namespace ns3 {
 bool
 NrSlSlotAlloc::operator < (const NrSlSlotAlloc &rhs) const
 {
-  return (sfn < rhs.sfn);
+  // return (sfn < rhs.sfn);
+  return (sfn < rhs.sfn) ||
+        ((sfn == rhs.sfn) && (slPsschSymStart<=rhs.slPsschSymStart) && (slPsschSymStart+slPsschSymLength <= rhs.slPsschSymStart+rhs.slPsschSymLength) && 
+        (slPsschSymStart+slPsschSymLength<=rhs.slPsschSymStart)) 
+  ;
+  // &
+  //       (slPsschSubChStart+slPsschSubChLength<rhs.slPsschSymStartv+rhs.slPsschSubChLength)
 }
 
 bool
@@ -119,6 +125,29 @@ NrSlSlotAlloc::GetSerializedSizeForE2 (void) const
                     2 + 2 + 2 + 2 +
                     2 + 1 + 1;
   return totalSize;
+}
+
+std::string
+NrSlSlotAlloc::GetString(){
+     return std::to_string(sfn.GetFrame()) + \
+     "," + std::to_string(sfn.GetSubframe()) + \
+     "," + std::to_string(sfn.GetSlot()) + \
+     "," + std::to_string(dstL2Id) + \
+     "," + std::to_string(ndi) + \
+     "," + std::to_string(rv) + \
+     "," + std::to_string(priority) + \
+     "," + std::to_string(mcs) + \
+     "," + std::to_string(numSlPscchRbs) + \
+     "," + std::to_string(slPscchSymStart) + \
+     "," + std::to_string(slPscchSymLength) + \
+     "," + std::to_string(slPsschSymStart) + \
+     "," + std::to_string(slPsschSymLength) + \
+     "," + std::to_string(slPsschSubChStart) + \
+     "," + std::to_string(slPsschSubChLength) + \
+     "," + std::to_string(maxNumPerReserve) + \
+     "," + std::to_string(txSci1A) + \
+     "," + std::to_string(slotNumInd)
+     ;
 }
 // end modification
 }

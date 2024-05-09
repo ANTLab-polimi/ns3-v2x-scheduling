@@ -321,7 +321,7 @@ NrUeMac::V2xE2Scheduling(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo){
     bool foundDest = itGrantInfo != m_grantInfoXapp.end () ? true : false;
     // NS_LOG_DEBUG("Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot);
     // std::cout << "Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
-    // std::cout << "UeMac:V2xE2Scheduling: id " << nrSlSlotAllocIt->dstL2Id << " Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
+    std::cout << "UeMac:V2xE2Scheduling: id " << nrSlSlotAllocIt->dstL2Id << " Sched slot " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
     if (foundDest)
     {
       // we found the destination in the map
@@ -334,19 +334,19 @@ NrUeMac::V2xE2Scheduling(uint64_t ueId, NrSlGrantInfo nrSlGrantInfo){
           // which are rescheduled in the new grant, thus we remove the old schedule
           // and update the value with the new schedules after
           NS_LOG_DEBUG("Future slots scheduling detected & removing " << slotAllocGrantXappIt->sfn << " new sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot);
-          // std::cout << "V2xE2Scheduling: " << "Future slots scheduling detected & removing " << slotAllocGrantXappIt->sfn << " new sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
+          std::cout << "V2xE2Scheduling: " << "Future slots scheduling detected & removing " << slotAllocGrantXappIt->sfn << " new sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
           itGrantInfo->second.slotAllocations.erase(slotAllocGrantXappIt, itGrantInfo->second.slotAllocations.end());
           break;
         }else{
           ++slotAllocGrantXappIt;
         }
       }
-      // std::cout << "V2xE2Scheduling: " << "Insert sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
+      std::cout << "V2xE2Scheduling: " << "Insert sched " << nrSlSlotAllocIt->sfn << " curr slot " << m_currentSlot << std::endl;
       // insert the new data to the set
       itGrantInfo->second.slotAllocations.insert((*nrSlSlotAllocIt));
       // NS_LOG_DEBUG()
     }else{
-      //  std::cout << " new insert in the map " << std::endl;
+       std::cout << " new insert in the map " << std::endl;
       // we haven't found it, thus we insert the whole grant
       m_grantInfoXapp.emplace (std::make_pair (nrSlGrantInfo.slotAllocations.begin ()->dstL2Id, nrSlGrantInfo));
     }
@@ -1821,8 +1821,26 @@ NrUeMac::DoNrSlSlotIndication (const SfnSf& sfn)
           while(slotAllocIt!= itGrantInfoXapp->second.slotAllocations.end()){
             if(slotAllocIt->sfn == sfn){
               NS_LOG_DEBUG("Inserting the slot " << sfn << " destination " << slotAllocIt->dstL2Id);
-              std::cout << "NrUeMac:DoNrSlSlotIndication:Inserting the slot " << sfn << " curr slot " << m_currentSlot << " destination " << slotAllocIt->dstL2Id << std::endl;
-              m_grantInfo.emplace(std::make_pair (slotAllocIt->dstL2Id, itGrantInfoXapp->second));
+              // std::cout << "NrUeMac:DoNrSlSlotIndication:Inserting the slot " << sfn << " curr slot " << m_currentSlot << " destination " << slotAllocIt->dstL2Id << std::endl;
+              
+              // should check if it is retransmit we have to set the harq id
+              if(!slotAllocIt->ndi){
+                // we have to indicate the harq id
+                std::map<uint8_t, uint32_t> destHarqMap = m_nrSlHarq->GetDestinationHarqMap(slotAllocIt->dstL2Id);
+                NS_LOG_DEBUG("Dest harq size xapp " << destHarqMap.size());
+                // we only add at the grant info when ther 
+                if( destHarqMap.size()>0){
+                  // assign the first available harq
+                  NS_LOG_DEBUG("First harq id " << +destHarqMap.begin()->first);
+                  itGrantInfoXapp->second.nrSlHarqId = destHarqMap.begin()->first;
+                  m_grantInfo.emplace(std::make_pair (slotAllocIt->dstL2Id, itGrantInfoXapp->second));
+                }
+                
+              }else{
+                m_grantInfo.emplace(std::make_pair (slotAllocIt->dstL2Id, itGrantInfoXapp->second));
+              }
+
+              
               // erase the allocation which we inserted in the original grant info and move to
               // the next until we reach end
               slotAllocIt = itGrantInfoXapp->second.slotAllocations.erase(slotAllocIt);
@@ -1908,6 +1926,7 @@ NrUeMac::DoNrSlSlotIndication (const SfnSf& sfn)
               //the LC ids whose packets are in the packet burst in the HARQ
               //buffer. I am not doing it at the moment as it might slow down
               //the simulation.
+              NS_LOG_DEBUG("dstl2id " << currentGrant.dstL2Id << " harq id " << +itGrantInfo.second.nrSlHarqId);
               itGrantInfo.second.tbTxCounter++;
               Ptr<PacketBurst> pb = CreateObject <PacketBurst> ();
               pb = m_nrSlHarq->GetPacketBurst (currentGrant.dstL2Id, itGrantInfo.second.nrSlHarqId);
@@ -2303,11 +2322,12 @@ NrUeMac::DoTransmitNrSlRlcPdu (const NrSlMacSapProvider::NrSlRlcPduParameters &p
 
 // modified
 void
-NrUeMac::DoReportNrSlPacketDelayStatus (uint16_t packetSeqNumber, uint64_t waitaingSince, uint32_t numPackets, uint32_t packetSize, uint16_t rnti, const NrSlMacSapProvider::NrSlReportBufferStatusParameters &params){
-  // NS_LOG_FUNCTION (this << m_rnti << rnti_rlc << params.rnti << " " << m_imsi << +params.lcid <<  " "  << m_srcL2Id  << params.srcL2Id << params.dstL2Id);
+NrUeMac::DoReportNrSlPacketDelayStatus (uint16_t packetSeqNumber, uint64_t waitaingSince, uint32_t numPackets, uint32_t packetSize, uint16_t rnti_rlc, const NrSlMacSapProvider::NrSlReportBufferStatusParameters &params){
+  NS_LOG_FUNCTION (this << m_rnti << " " << rnti_rlc << " " << params.rnti << " " << m_imsi <<  " " << +params.lcid <<  " "  << m_srcL2Id << " "  << params.srcL2Id << " " << params.dstL2Id);
   // the insertion of a new packet
   // check if the packet sequence number is set to 0
-  // uint16_t rnti = (uint16_t) params.dstL2Id;
+  uint16_t rnti = (uint16_t) params.dstL2Id;
+  // uint16_t rnti = (uint16_t) rnti_rlc;
     // uint16_t rnti = params.rnti;
     m_packetDelayMap[rnti].hasChanged = true;
   if (packetSeqNumber == 0){

@@ -100,6 +100,11 @@ LteEnbNetDevice::KpmSubscriptionCallback (E2AP_PDU_t* sub_req_pdu)
                  ", instanceId " << +params.instanceId << 
                  ", ranFuncionId " << +params.ranFuncionId << 
                  ", actionId " << +params.actionId);  
+
+  std::cout<<"requestorId " << +params.requestorId << 
+                 ", instanceId " << +params.instanceId << 
+                 ", ranFuncionId " << +params.ranFuncionId << 
+                 ", actionId " << +params.actionId << std::endl;  
   
   if (!m_isReportingEnabled && !m_forceE2FileLogging)
   {

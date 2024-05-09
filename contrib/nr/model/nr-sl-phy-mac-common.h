@@ -186,6 +186,8 @@ struct NrSlSlotAlloc
   uint32_t DeserializeForE2 (Buffer::Iterator i);
 
   uint32_t GetSerializedSizeForE2 (void) const;
+
+  std::string GetString();
   // end modification
 };
 

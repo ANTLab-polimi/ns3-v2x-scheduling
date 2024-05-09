@@ -41,6 +41,9 @@
 #include <string>
 #include <time.h>
 
+#include <iostream>
+#include <unistd.h>
+
 const std::string currentDateTime() {
     time_t     now = time(0);
     struct tm  tstruct;
@@ -93,12 +96,17 @@ NrGnbNetDevice::KpmSubscriptionCallback (E2AP_PDU_t* sub_req_pdu)
                  ", instanceId " << +params.instanceId << 
                  ", ranFuncionId " << +params.ranFuncionId << 
                  ", actionId " << +params.actionId);  
+
+  std::cout << "requestorId " << +params.requestorId << 
+                 ", instanceId " << +params.instanceId << 
+                 ", ranFuncionId " << +params.ranFuncionId << 
+                 ", actionId " << +params.actionId << std::endl; 
   
   if (!m_isReportingEnabled && !m_forceE2FileLogging)
   {
     
-    Simulator::ScheduleWithContext (1, MilliSeconds(10),
-                                   &NrGnbNetDevice::BuildAndSendReportMessage, this, params);
+    // Simulator::ScheduleWithContext (1, MilliSeconds(10),
+    //                                &NrGnbNetDevice::BuildAndSendReportMessage, this, params);
     m_isReportingEnabled = true; 
   }
 }
@@ -219,51 +227,61 @@ NrGnbNetDevice::ControlMessageReceivedCallback (E2AP_PDU_t* ric_pdu)
           SfnSf firstSfnsf;
           SfnSf lastSfnsf;
 
-          for (std::map<long, std::map<long, encoding::dest_sched_t>>::iterator sourceUserIt = resultMap.begin(); 
-            sourceUserIt!=resultMap.end(); ++sourceUserIt){
-            uint64_t sourceId = (uint64_t)sourceUserIt->first;
-            NS_LOG_DEBUG("Source id " << sourceId);
-            NrSlGrantInfo nrSlGrantInfo;
+          if (resultMap.size()){
 
-            for (std::map<long, encoding::dest_sched_t>::iterator singleUserIt = sourceUserIt->second.begin(); 
-              singleUserIt!=sourceUserIt->second.end(); ++singleUserIt){
-              uint64_t ueId = (uint64_t) singleUserIt->first;
-              nrSlGrantInfo.cReselCounter = singleUserIt->second.cReselectionCounter;
-              nrSlGrantInfo.slResoReselCounter = singleUserIt->second.slResourceReselectionCounter;
-              nrSlGrantInfo.prevSlResoReselCounter = singleUserIt->second.prevSlResoReselCounter;
-              nrSlGrantInfo.nrSlHarqId = singleUserIt->second.nrSlHarqId;
-              nrSlGrantInfo.nSelected = singleUserIt->second.nSelected;
-              nrSlGrantInfo.tbTxCounter = singleUserIt->second.tbTxCounter;
-              for (auto &allocMessageBuffer: singleUserIt->second.singleUserAllocations)  {
+            for (std::map<long, std::map<long, encoding::dest_sched_t>>::iterator sourceUserIt = resultMap.begin(); 
+              sourceUserIt!=resultMap.end(); ++sourceUserIt){
+              uint64_t sourceId = (uint64_t)sourceUserIt->first;
+              NS_LOG_DEBUG("Source id " << sourceId);
+              NrSlGrantInfo nrSlGrantInfo = NrSlGrantInfo();
+
+              for (std::map<long, encoding::dest_sched_t>::iterator singleUserIt = sourceUserIt->second.begin(); 
+                singleUserIt!=sourceUserIt->second.end(); ++singleUserIt){
+                uint64_t ueId = (uint64_t) singleUserIt->first;
+                nrSlGrantInfo.cReselCounter = singleUserIt->second.cReselectionCounter;
+                nrSlGrantInfo.slResoReselCounter = singleUserIt->second.slResourceReselectionCounter;
+                nrSlGrantInfo.prevSlResoReselCounter = singleUserIt->second.prevSlResoReselCounter;
+                nrSlGrantInfo.nrSlHarqId = singleUserIt->second.nrSlHarqId;
+                nrSlGrantInfo.nSelected = singleUserIt->second.nSelected;
+                nrSlGrantInfo.tbTxCounter = singleUserIt->second.tbTxCounter;
                 
-                Buffer bufferSingleAlloc = Buffer();
-                NS_LOG_DEBUG("Deserialization buffer size " << allocMessageBuffer.length); 
-                bufferSingleAlloc.Deserialize(allocMessageBuffer.buffer, allocMessageBuffer.length);
-                NrSlSlotAlloc singleAlloc = NrSlSlotAlloc();
-                Buffer::Iterator bufferSingleAllocIt = bufferSingleAlloc.Begin();
-                singleAlloc.DeserializeForE2(bufferSingleAllocIt);
-                nrSlGrantInfo.slotAllocations.emplace(singleAlloc);
+                for (auto &allocMessageBuffer: singleUserIt->second.singleUserAllocations)  {
+
+                  Buffer bufferSingleAlloc = Buffer(0, false);
+                  NS_LOG_DEBUG("Deserialization buffer size " << allocMessageBuffer.length); 
+                  bufferSingleAlloc.Deserialize(allocMessageBuffer.buffer, allocMessageBuffer.length);
+                  NrSlSlotAlloc singleAlloc = NrSlSlotAlloc();
+                  Buffer::Iterator bufferSingleAllocIt = bufferSingleAlloc.Begin();
+                  singleAlloc.DeserializeForE2(bufferSingleAllocIt);
+                  auto emplaceRes = nrSlGrantInfo.slotAllocations.emplace(singleAlloc);
+                  // std::cout << "Trying to insert sfn " << singleAlloc.GetString() << " res: " << emplaceRes.second << std::endl;
+                  
+                }
+                
+                if((sourceUserIt == resultMap.begin()) & (singleUserIt == sourceUserIt->second.begin()) & (nrSlGrantInfo.slotAllocations.size()>0)){
+                  firstSfnsf = nrSlGrantInfo.slotAllocations.begin()->sfn;
+                }
+                
+                if((sourceUserIt == std::prev(resultMap.end())) & (singleUserIt == std::prev(sourceUserIt->second.end())) & (nrSlGrantInfo.slotAllocations.size()>0)){
+                  lastSfnsf = nrSlGrantInfo.slotAllocations.begin()->sfn;
+                }
               }
-              
-              if((sourceUserIt == resultMap.begin()) & (singleUserIt == sourceUserIt->second.begin()) & (nrSlGrantInfo.slotAllocations.size()>0)){
-                firstSfnsf = nrSlGrantInfo.slotAllocations.begin()->sfn;
-              }
-              
-              if((sourceUserIt == std::prev(resultMap.end())) & (singleUserIt == std::prev(sourceUserIt->second.end())) & (nrSlGrantInfo.slotAllocations.size()>0)){
-                lastSfnsf = nrSlGrantInfo.slotAllocations.begin()->sfn;
-              }
+              Simulator::ScheduleWithContext(1, Seconds(0), 
+                    &NrGnbNetDevice::SendSchedulerDataToTrace, this, sourceId, nrSlGrantInfo, plmnId, controlMessageMulti->m_lastReport); 
             }
+          }else{
+            NrSlGrantInfo nrSlGrantInfo;
             Simulator::ScheduleWithContext(1, Seconds(0), 
-                  &NrGnbNetDevice::SendSchedulerDataToTrace, this, sourceId, nrSlGrantInfo, plmnId, controlMessageMulti->m_lastReport); 
+                    &NrGnbNetDevice::SendSchedulerDataToTrace, this, 0, nrSlGrantInfo, plmnId, true); 
           }
         
-          NS_LOG_DEBUG("First slot " << firstSfnsf << " last slot " << lastSfnsf);
+          // NS_LOG_DEBUG("First slot " << firstSfnsf << " last slot " << lastSfnsf);
           std::cout << "First slot " << firstSfnsf << " last slot " << lastSfnsf << " curr slot " << GetPhy(0)->GetCurrentSfnSf() << std::endl;
         }
       }
     }
   }
-  catch(std::exception& e){
+  catch(...){
     std::cout << "Exception occured" << std::endl;
   }
 }
@@ -301,9 +319,10 @@ NrGnbNetDevice::SendSchedulerDataToTrace(uint64_t ueId, NrSlGrantInfo nrSlGrantI
   m_e2V2XSchedulingTrace(ueId, nrSlGrantInfo, plmnId);
   if (isLastReport){
     std::cout << currentDateTime() <<  " - Received last report; Unblock simulation" <<std::endl;
+    m_pauseSimulation = false;
   }
   
-  m_pauseSimulation = false;
+  
 }
 
 void
@@ -514,6 +533,7 @@ NrGnbNetDevice::BuildAndSendReportMessage(E2Termination::RicSubscriptionRequest_
       // Send CU-CP only if offline logging is disabled
       
       SendMessage(params, generatingCellId, header, cuCpMsg);
+      usleep(100000);
       // Simulator::ScheduleWithContext (1, NanoSeconds (1),
       //                               &NrGnbNetDevice::SendMessage, this, params, generatingCellId, header, cuCpMsg);
     }
@@ -1359,6 +1379,14 @@ NrGnbNetDevice::UpdateConfig (void)
                                     &NrGnbNetDevice::BuildAndSendReportMessage, this, params);
   }
 
+  testE2Term = true;
+
+  if (testE2Term){
+    E2Termination::RicSubscriptionRequest_rval_s params{24, 0, 200, 1};
+    Simulator::ScheduleWithContext (1, Seconds(2),
+                                    &NrGnbNetDevice::BuildAndSendReportMessage, this, params);
+  }
+
 
   if(m_e2term!=nullptr){
     NS_LOG_DEBUG("E2sim start in cell " << m_cellId 
@@ -1375,6 +1403,8 @@ NrGnbNetDevice::UpdateConfig (void)
         Simulator::Schedule (MicroSeconds (0), &E2Termination::Start, m_e2term);
       }
   }
+
+
 }
 
 void 
@@ -1452,6 +1482,12 @@ NrGnbNetDevice::AggregateData(std::map<uint16_t, std::map<uint16_t, PacketDelayS
       mValues[userBufferIt->first][packetDelaysInBufferIt->first].harqIdBufferSize = packetDelaysInBufferIt->second.harqIdBufferSizeMap;
 
       uint32_t _packetDelayGroupingGranularity = m_packetDelayGroupingGranularity;
+      
+      if (packetDelaysInBufferIt->second.m_waitingSincePacket.size()>0){
+        _packetDelayGroupingGranularity = (uint32_t) *std::max_element(packetDelaysInBufferIt->second.m_waitingSincePacket.begin(), 
+                                                            packetDelaysInBufferIt->second.m_waitingSincePacket.end());
+      }
+      
       uint32_t _packetDelayGroupingGranularityInd = 0;
       std::map<uint32_t, BufferSize> num_packets_agg_value;
       do

@@ -298,7 +298,7 @@ main (int argc, char *argv[])
       // LogComponentEnable ("NrSpectrumPhy", logLevel);
       // LogComponentEnable ("E2Termination", logLevel);
       // LogComponentEnable ("NrGnbNetDevice", logLevel);
-      // LogComponentEnable ("Asn1Types", logLevel);
+      // LogComponentEnable ("RicControlMessage", logLevel);  
       // LogComponentEnable ("ThreeGppSpectrumPropagationLossModel", logLevel);
 
       
@@ -361,6 +361,8 @@ main (int argc, char *argv[])
   NodeContainer enbNodes;
   enbNodes.Create (1);
 
+  ns2.Install();
+
   // MobilityHelper mobility;
   // mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   // Ptr<ListPositionAllocator> positionAllocUe = CreateObject<ListPositionAllocator> ();
@@ -387,7 +389,8 @@ main (int argc, char *argv[])
   // mobility.Install (ueVoiceContainer);
   // install the mobility of nodes
   // TODO: check the mobility of gnb
-  ns2.Install();
+
+  std::cout << "Mobility set" << std::endl;
 
   Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper> ();
   Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
@@ -767,45 +770,45 @@ main (int argc, char *argv[])
 
   // modified
   UeV2XScheduling v2xSchedulingxApp;
-  v2xSchedulingxApp.SetDb (&db, "v2XSchedulingXapp", 100000); 
+  v2xSchedulingxApp.SetDb (&db, "v2XSchedulingXapp", 100); 
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrGnbNetDevice/SlV2XScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifyxAppScheduling, &v2xSchedulingxApp, DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->GetPhy(0)));
 
   // Mode 2 scheduling
   UeV2XScheduling v2xSchedulingMode2;
-  v2xSchedulingMode2.SetDb (&db, "v2xSchedulingMode2", 100000); 
+  v2xSchedulingMode2.SetDb (&db, "v2xSchedulingMode2", 1000); 
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/UeSlV2XScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifyUeScheduling, &v2xSchedulingMode2));
 
   // mobility 
   SlMobilityStats mobilityStats;
-  mobilityStats.SetDb (&db, "mobility", 100000); 
+  mobilityStats.SetDb (&db, "mobility", 1000); 
 
   // end modification
 
   UeMacPscchTxOutputStats pscchStats;
-  pscchStats.SetDb (&db, "pscchTxUeMac", 100000);
+  pscchStats.SetDb (&db, "pscchTxUeMac", 1000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPscchScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPscchScheduling, &pscchStats));
 
   UeMacPsschTxOutputStats psschStats;
-  psschStats.SetDb (&db, "psschTxUeMac", 100000);
+  psschStats.SetDb (&db, "psschTxUeMac", 1000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPsschScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPsschScheduling, &psschStats));
 
 
   UePhyPscchRxOutputStats pscchPhyStats;
-  pscchPhyStats.SetDb (&db, "pscchRxUePhy", 100000);
+  pscchPhyStats.SetDb (&db, "pscchRxUePhy", 1000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/RxPscchTraceUe",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPscchRx, &pscchPhyStats));
 
   UePhyPsschRxOutputStats psschPhyStats;
-  psschPhyStats.SetDb (&db, "psschRxUePhy", 100000);
+  psschPhyStats.SetDb (&db, "psschRxUePhy", 1000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/RxPsschTraceUe",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPsschRx, &psschPhyStats));
 
   UeToUePktTxRxOutputStats pktStats;
-  pktStats.SetDb (&db, "pktTxRx", 100000);
+  pktStats.SetDb (&db, "pktTxRx", 1000);
 
   if (!useIPv6)
     {
