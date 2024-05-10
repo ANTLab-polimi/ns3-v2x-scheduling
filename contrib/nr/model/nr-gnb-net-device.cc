@@ -533,7 +533,7 @@ NrGnbNetDevice::BuildAndSendReportMessage(E2Termination::RicSubscriptionRequest_
       // Send CU-CP only if offline logging is disabled
       
       SendMessage(params, generatingCellId, header, cuCpMsg);
-      usleep(100000);
+      usleep(200000);
       // Simulator::ScheduleWithContext (1, NanoSeconds (1),
       //                               &NrGnbNetDevice::SendMessage, this, params, generatingCellId, header, cuCpMsg);
     }
