@@ -2185,14 +2185,14 @@ NrUeMac::DoSchedUeNrSlConfigInd (const std::set<NrSlSlotAlloc>& slotAllocList)
     {
       NrSlGrantInfo grant = CreateGrantInfo (slotAllocList);
       itGrantInfo = m_grantInfo.emplace (std::make_pair (slotAllocList.begin ()->dstL2Id, grant)).first;
-      m_ueV2XSchedulingTrace(slotAllocList.begin ()->dstL2Id, grant);
+      m_ueV2XSchedulingTrace(m_srcL2Id, grant);
     }
   else
     {
       NS_ASSERT_MSG (itGrantInfo->second.slResoReselCounter == 0, "Sidelink resource counter must be zero before assigning new grant for dst " << slotAllocList.begin ()->dstL2Id);
       NrSlGrantInfo grant = CreateGrantInfo (slotAllocList);
       itGrantInfo->second = grant;
-      m_ueV2XSchedulingTrace(itGrantInfo->first, grant);
+      m_ueV2XSchedulingTrace(m_srcL2Id, grant);
     }
 
   NS_ASSERT_MSG (itGrantInfo->second.slotAllocations.size () > 0, "CreateGrantInfo failed to create grants");

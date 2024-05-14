@@ -163,10 +163,10 @@ main (int argc, char *argv[])
   // Traffic parameters (that we will use inside this script:)
   bool useIPv6 = false; // default IPV4
   uint32_t udpPacketSizeBe = 200;
-  double dataRateBe = 160; //16 kilobits per second
+  double dataRateBe = 16; //16 kilobits per second
 
   // Simulation parameters.
-  Time simTime = Seconds (300);
+  Time simTime = Seconds (30);
   //Sidelink bearers activation time
   Time slBearersActivationTime = Seconds (2.0);
 
@@ -328,6 +328,8 @@ main (int argc, char *argv[])
                       StringValue(outputDir + simTag + "/"));
   Config::SetDefault ("ns3::LteEnbNetDevice::TracesPath",
                       StringValue(outputDir + simTag + "/"));
+  Config::SetDefault ("ns3::NrHelper::TracesPath",
+                      StringValue(outputDir + simTag + "/"));
 
   NrSlCommResourcePool::SchedulingType schedulingTypeValue = static_cast<NrSlCommResourcePool::SchedulingType>(schedulingType);
   std::cout << "Scheduling type " << schedulingTypeValue << std::endl;
@@ -353,7 +355,7 @@ main (int argc, char *argv[])
    */
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue(999999999));
 
-  Ns2MobilityHelper ns2 = Ns2MobilityHelper(traceFile);
+  // Ns2MobilityHelper ns2 = Ns2MobilityHelper(traceFile);
 
   NodeContainer ueVoiceContainer;
   ueVoiceContainer.Create (ueNum);
@@ -361,34 +363,32 @@ main (int argc, char *argv[])
   NodeContainer enbNodes;
   enbNodes.Create (1);
 
-  ns2.Install();
+  // ns2.Install();
 
-  // MobilityHelper mobility;
-  // mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  // Ptr<ListPositionAllocator> positionAllocUe = CreateObject<ListPositionAllocator> ();
-  // for (uint16_t i = 0; i < ueNum; i++)
-  //   {
-  //     positionAllocUe->Add (Vector (interUeDistance * i, 0.0, 1.5));
-  //   }
-  // mobility.SetPositionAllocator (positionAllocUe);
-  // mobility.Install (ueVoiceContainer);
+  MobilityHelper mobility;
+  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  Ptr<ListPositionAllocator> positionAllocUe = CreateObject<ListPositionAllocator> ();
+  for (uint16_t i = 0; i < ueNum; i++)
+    {
+      positionAllocUe->Add (Vector (interUeDistance * i, 0.0, 1.5));
+    }
+  mobility.SetPositionAllocator (positionAllocUe);
+  mobility.Install (ueVoiceContainer);
 
-  // double rho = 500;
-  // Ptr<UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator> ();
-  // uePositionAlloc->SetX(ueDiscCenterXPosition);
-  // uePositionAlloc->SetY(ueDiscCenterYPosition);
-  //  uePositionAlloc->SetZ(1.5);
-  // uePositionAlloc->SetRho (rho);
-  // Ptr<UniformRandomVariable> speed = CreateObject<UniformRandomVariable> ();
-  // speed->SetAttribute ("Min", DoubleValue (0.5));
-  // speed->SetAttribute ("Max", DoubleValue (1.8));
-  // mobility.SetMobilityModel ("ns3::RandomWalk2dOutdoorMobilityModel", "Speed",
-  //                               PointerValue (speed), "Bounds",
-  //                               RectangleValue (Rectangle (ueDiscCenterXPosition-rho, ueDiscCenterXPosition+rho, ueDiscCenterYPosition-rho, ueDiscCenterYPosition+rho)));
-  // mobility.SetPositionAllocator (uePositionAlloc);
-  // mobility.Install (ueVoiceContainer);
-  // install the mobility of nodes
-  // TODO: check the mobility of gnb
+  double rho = 500;
+  Ptr<UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator> ();
+  uePositionAlloc->SetX(ueDiscCenterXPosition);
+  uePositionAlloc->SetY(ueDiscCenterYPosition);
+   uePositionAlloc->SetZ(1.5);
+  uePositionAlloc->SetRho (rho);
+  Ptr<UniformRandomVariable> speed = CreateObject<UniformRandomVariable> ();
+  speed->SetAttribute ("Min", DoubleValue (0.5));
+  speed->SetAttribute ("Max", DoubleValue (1.8));
+  mobility.SetMobilityModel ("ns3::RandomWalk2dOutdoorMobilityModel", "Speed",
+                                PointerValue (speed), "Bounds",
+                                RectangleValue (Rectangle (ueDiscCenterXPosition-rho, ueDiscCenterXPosition+rho, ueDiscCenterYPosition-rho, ueDiscCenterYPosition+rho)));
+  mobility.SetPositionAllocator (uePositionAlloc);
+  mobility.Install (ueVoiceContainer);
 
   std::cout << "Mobility set" << std::endl;
 
@@ -397,6 +397,7 @@ main (int argc, char *argv[])
 
   // Put the pointers inside nrHelper
   nrHelper->SetEpcHelper (epcHelper);
+
 
   /*
    * Spectrum division. We create one operational band, containing
@@ -723,6 +724,7 @@ main (int argc, char *argv[])
   std::cout << "App start time " << realAppStart << " sec" << std::endl;
   std::cout << "App stop time " << appStopTime << " sec" << std::endl;
 
+  nrHelper->EnableTraces();
 
   ApplicationContainer serverApps;
   PacketSinkHelper sidelinkSink ("ns3::UdpSocketFactory", localAddress);

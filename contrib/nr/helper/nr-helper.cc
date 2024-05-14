@@ -1561,23 +1561,23 @@ NrHelper::ActivateDataRadioBearer (Ptr<NetDevice> ueDevice, EpsBearer bearer)
 void
 NrHelper::EnableTraces (void)
 {
-  EnableDlDataPhyTraces ();
-  EnableDlCtrlPhyTraces ();
-  EnableUlPhyTraces ();
+  // EnableDlDataPhyTraces ();
+  // EnableDlCtrlPhyTraces ();
+  // EnableUlPhyTraces ();
   //EnableEnbPacketCountTrace ();
   //EnableUePacketCountTrace ();
   //EnableTransportBlockTrace ();
   EnableRlcSimpleTraces ();
   EnableRlcE2eTraces ();
-  EnablePdcpSimpleTraces ();
-  EnablePdcpE2eTraces ();
-  EnableGnbPhyCtrlMsgsTraces ();
-  EnableUePhyCtrlMsgsTraces ();
-  EnableGnbMacCtrlMsgsTraces ();
-  EnableUeMacCtrlMsgsTraces ();
-  EnableDlMacSchedTraces ();
-  EnableUlMacSchedTraces ();
-  EnablePathlossTraces ();
+  // EnablePdcpSimpleTraces ();
+  // EnablePdcpE2eTraces ();
+  // EnableGnbPhyCtrlMsgsTraces ();
+  // EnableUePhyCtrlMsgsTraces ();
+  // EnableGnbMacCtrlMsgsTraces ();
+  // EnableUeMacCtrlMsgsTraces ();
+  // EnableDlMacSchedTraces ();
+  // EnableUlMacSchedTraces ();
+  // EnablePathlossTraces ();
 }
 
 Ptr<NrPhyRxTrace>
