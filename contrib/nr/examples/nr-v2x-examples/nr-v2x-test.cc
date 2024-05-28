@@ -772,45 +772,45 @@ main (int argc, char *argv[])
 
   // modified
   UeV2XScheduling v2xSchedulingxApp;
-  v2xSchedulingxApp.SetDb (&db, "v2XSchedulingXapp", 100); 
+  v2xSchedulingxApp.SetDb (&db, "v2XSchedulingXapp", 10000); 
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrGnbNetDevice/SlV2XScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifyxAppScheduling, &v2xSchedulingxApp, DynamicCast<NrGnbNetDevice> (enbNetDev.Get (0))->GetPhy(0)));
 
   // Mode 2 scheduling
   UeV2XScheduling v2xSchedulingMode2;
-  v2xSchedulingMode2.SetDb (&db, "v2xSchedulingMode2", 1000); 
+  v2xSchedulingMode2.SetDb (&db, "v2xSchedulingMode2", 10000); 
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/UeSlV2XScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifyUeScheduling, &v2xSchedulingMode2));
 
   // mobility 
   SlMobilityStats mobilityStats;
-  mobilityStats.SetDb (&db, "mobility", 1000); 
+  mobilityStats.SetDb (&db, "mobility", 10000); 
 
   // end modification
 
   UeMacPscchTxOutputStats pscchStats;
-  pscchStats.SetDb (&db, "pscchTxUeMac", 1000);
+  pscchStats.SetDb (&db, "pscchTxUeMac", 10000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPscchScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPscchScheduling, &pscchStats));
 
   UeMacPsschTxOutputStats psschStats;
-  psschStats.SetDb (&db, "psschTxUeMac", 1000);
+  psschStats.SetDb (&db, "psschTxUeMac", 10000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPsschScheduling",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPsschScheduling, &psschStats));
 
 
   UePhyPscchRxOutputStats pscchPhyStats;
-  pscchPhyStats.SetDb (&db, "pscchRxUePhy", 1000);
+  pscchPhyStats.SetDb (&db, "pscchRxUePhy", 10000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/RxPscchTraceUe",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPscchRx, &pscchPhyStats));
 
   UePhyPsschRxOutputStats psschPhyStats;
-  psschPhyStats.SetDb (&db, "psschRxUePhy", 1000);
+  psschPhyStats.SetDb (&db, "psschRxUePhy", 10000);
   Config::ConnectWithoutContext ("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/RxPsschTraceUe",
                                    MakeBoundCallback (&SlStatsHelper::NotifySlPsschRx, &psschPhyStats));
 
   UeToUePktTxRxOutputStats pktStats;
-  pktStats.SetDb (&db, "pktTxRx", 1000);
+  pktStats.SetDb (&db, "pktTxRx", 10000);
 
   if (!useIPv6)
     {
